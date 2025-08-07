@@ -30,4 +30,4 @@ export PATH=$PATH:$DOTNET_ROOT
   --url "https://github.com/${repo}" \
   --token "${token}"
 
-./run.sh
+/usr/bin/bash -l -c "./run.sh"
