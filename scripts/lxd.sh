@@ -132,7 +132,9 @@ build_image() {
       lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
       lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
             --compression none \
-            description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}"
+            description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
+            --property build.commit="${BUILD_SHA}" \
+            --property build.date="${BUILD_DATE}"
   
       msg "Export the image to ${EXPORT} for use elsewhere"
       lxc image export "${IMAGE_ALIAS}" ${EXPORT}
@@ -163,6 +165,8 @@ prolog() {
   HOST_OS_VERSION=$(cat /etc/os-release | grep -E 'VERSION_ID' | cut -d'=' -f2 | tr -d '"')
   HOST_INSTALLER_SCRIPT_FOLDER="${HELPERS_DIR}/../../images/${HOST_OS_NAME}/scripts/build"
   BUILD_HOME="/home"
+  BUILD_SHA=$(git rev-parse HEAD)
+  BUILD_DATE=$(date -u)
   LXD_CONTAINER="${IMAGE_OS}:${IMAGE_VERSION}"
 
   mkdir -p distro
