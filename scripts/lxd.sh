@@ -115,6 +115,12 @@ build_image() {
           msg "No existing image with alias ${IMAGE_ALIAS} found."
       fi
 
+      msg "Updating /etc/passwd by adding `runner` user to all groups"
+      lxc exec "${BUILD_CONTAINER}" -- sudo usermod -g "$(id -g)" runner
+      msg "Verifying uid and gid"
+      lxc exec "${BUILD_CONTAINER}" -- id
+      
+
       msg "Runner build complete. Creating image snapshot."
       lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
       lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
