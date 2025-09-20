@@ -144,12 +144,14 @@ build_image() {
             properties.build.date="${BUILD_DATE}"
  
   msg "Export the image to ${EXPORT} for use elsewhere"
-  lxc image export "${IMAGE_ALIAS}" ${EXPORT}
+  lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
 
+  local PRIMER_CONTAINER
+  PRIMER_CONTAINER="primer-$(date +%s)"
   msg "Priming the filesystem by launching the newly built container"
-  lxc launch "${IMAGE_ALIAS}" "primer"
-  lxc rm -f primer
-  
+  lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
+  lxc rm -f "${PRIMER_CONTAINER}"
+
   # Before exiting successfully, clear the trap so it doesn't run again on the main script's exit.
   trap - INT TERM EXIT
   lxc delete -f "${BUILD_CONTAINER}"
@@ -165,7 +167,7 @@ run() {
 prolog() {
   PATH=/snap/bin:${PATH}
   ACTION_RUNNER="https://github.com/actions/runner"
-  EXPORT="distro/lxc-runner"
+  EXPORT="/opt/distro"
   HOST_OS_NAME=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"' | tr '[:upper:]' '[:lower:]' | awk '{print $1}')
   HOST_OS_VERSION=$(cat /etc/os-release | grep -E 'VERSION_ID' | cut -d'=' -f2 | tr -d '"')
   HOST_INSTALLER_SCRIPT_FOLDER="${HELPERS_DIR}/../../images/${HOST_OS_NAME}/scripts/build"
@@ -174,7 +176,7 @@ prolog() {
   BUILD_DATE=$(date -u)
   LXD_CONTAINER="${IMAGE_OS}:${IMAGE_VERSION}"
 
-  mkdir -p distro
+  mkdir -p ${EXPORT}
 }
 
 prolog
