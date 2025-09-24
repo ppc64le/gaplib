@@ -57,7 +57,9 @@ touch $netfilter_rule
 echo 'ACTION=="add", SUBSYSTEM=="module", KERNEL=="nf_conntrack", RUN+="/usr/sbin/sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1"' | tee -a $netfilter_rule
 
 # Disable motd updates metadata
-sed -i 's/ENABLED=1/ENABLED=0/g' /etc/default/motd-news
+if [[ -f /etc/default/motd-news ]]; then
+    sed -i 's/ENABLED=1/ENABLED=0/g' /etc/default/motd-news
+fi
 
 if [[ -f "/etc/fwupd/daemon.conf" ]]; then
     sed -i 's/UpdateMotd=true/UpdateMotd=false/g' /etc/fwupd/daemon.conf
