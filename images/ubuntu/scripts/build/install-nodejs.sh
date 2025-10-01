@@ -3,6 +3,7 @@
 ##  File:  install-nodejs.sh
 ##  Desc:  Install Node.js LTS and related tooling (Gulp, Grunt)
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 

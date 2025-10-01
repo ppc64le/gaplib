@@ -71,7 +71,6 @@ run() {
     post_cleanup
 }
 
-ARCH=$(uname -m)
 RUNNERREPO="https://github.com/actions/runner"
 
 # Parse arguments

@@ -3,16 +3,17 @@
 ##  File:  configure-apt.sh
 ##  Desc:  Configure apt, install jq and apt-fast packages.
 ################################################################################
+
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
 
 # Stop and disable apt-daily upgrade services;
-systemctl stop apt-daily.timer >/dev/null
-systemctl disable apt-daily.timer >/dev/null
-systemctl disable apt-daily.service >/dev/null
-systemctl stop apt-daily-upgrade.timer >/dev/null
-systemctl disable apt-daily-upgrade.timer >/dev/null
-systemctl disable apt-daily-upgrade.service >/dev/null
+systemctl stop apt-daily.timer
+systemctl disable apt-daily.timer
+systemctl disable apt-daily.service
+systemctl stop apt-daily-upgrade.timer
+systemctl disable apt-daily-upgrade.timer
+systemctl disable apt-daily-upgrade.service
 
 # Enable retry logic for apt up to 10 times
 echo "APT::Acquire::Retries \"10\";" > /etc/apt/apt.conf.d/80-retries
@@ -31,11 +32,13 @@ echo 'APT::Get::Always-Include-Phased-Updates "true";' > /etc/apt/apt.conf.d/99-
 cat <<EOF >> /etc/apt/apt.conf.d/99bad_proxy
 Acquire::http::Pipeline-Depth 0;
 Acquire::http::No-Cache true;
+Acquire::https::Pipeline-Depth 0;
+Acquire::https::No-Cache true;
 Acquire::BrokenProxy    true;
 EOF
 
 # Uninstall unattended-upgrades
-apt-get -qq purge unattended-upgrades >/dev/null |& tee -a /tmp/install.errors
+apt-get purge unattended-upgrades
 
 echo 'APT sources'
 if ! is_ubuntu24; then

@@ -3,6 +3,7 @@
 ##  File:  install-swift.sh
 ##  Desc:  Install Swift
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh
@@ -24,7 +25,7 @@ else
 
     # Verifying PGP signature using official Swift PGP key. Referring to https://www.swift.org/install/linux/#Installation-via-Tarball
     # Download and import Swift PGP keys
-    gpg --keyserver hkp://keyserver.ubuntu.com \
+    gpg --keyserver hkps://keyserver.ubuntu.com:443 \
           --recv-keys \
           '7463 A81A 4B2E EA1B 551F  FBCF D441 C977 412B 37AD' \
           '1BE1 E29A 084C B305 F397  D62A 9F59 7F4D 21A5 6D5F' \
@@ -35,28 +36,29 @@ else
           '8A74 9566 2C3C D4AE 18D9  5637 FAF6 989E 1BC1 6FEA' \
           'E813 C892 820A 6FA1 3755  B268 F167 DF1A CF9C E069' \
           '52BB 7E3D E28A 71BE 22EC  05FF EF80 A866 B47A 981F'
-    gpg --keyserver hkp://keyserver.ubuntu.com --refresh-keys Swift
-
+    
+    gpg --keyserver hkps://keyserver.ubuntu.com:443 --refresh-keys Swift
+    
     # Download and verify signature
     signature_path=$(download_with_retry "${archive_url}.sig")
     gpg --verify "$signature_path" "$archive_path"
-
+    
     # Remove Swift PGP public key with temporary keyring
     rm -rf ~/.gnupg
-
+    
     # Extract and install swift
     tar xzf "$archive_path" -C /tmp
-
+    
     SWIFT_INSTALL_ROOT="/usr/share/swift"
     swift_bin_root="$SWIFT_INSTALL_ROOT/usr/bin"
     swift_lib_root="$SWIFT_INSTALL_ROOT/usr/lib"
-
+    
     mv "/tmp/${swift_release_name}" $SWIFT_INSTALL_ROOT
     mkdir -p /usr/local/lib
-
+    
     ln -s "$swift_bin_root/swift" /usr/local/bin/swift
     ln -s "$swift_bin_root/swiftc" /usr/local/bin/swiftc
     ln -s "$swift_lib_root/libsourcekitdInProc.so" /usr/local/lib/libsourcekitdInProc.so
-
+    
     set_etc_environment_variable "SWIFT_PATH" "${swift_bin_root}"
 fi

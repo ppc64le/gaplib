@@ -3,12 +3,11 @@
 ##  File:  install-android-sdk.sh
 ##  Desc:  Install Android SDK and tools
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh
-
-ARCH=${ARCH:-$(uname -m)}
 
 if [[ "$ARCH" == "ppc64le" ]]; then 
     # Placeholder for ppc64le-specific logic
@@ -117,6 +116,9 @@ else
 
     add_filtered_installation_components $minimum_platform_version "${available_platforms[@]}"
     add_filtered_installation_components $minimum_build_tool_version "${available_build_tools[@]}"
+    
+    # Add platform tools to the list of components to install
+    components+=("platform-tools")
 
     # Install components
     echo "y" | $SDKMANAGER ${components[@]}

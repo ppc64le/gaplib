@@ -3,23 +3,19 @@
 ##  File:  install-ruby.sh
 ##  Desc:  Install Ruby requirements and ruby gems
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
 
 install_dpkgs ruby-full
 
-# temporary fix for fastlane installation https://github.com/sporkmonger/addressable/issues/541
-if is_ubuntu20; then
-    gem install public_suffix -v 5.1.1
-fi
-
 # Install ruby gems from toolset
 gems_to_install=$(get_toolset_value ".rubygems[] .name")
 if [[ -n "$gems_to_install" ]]; then
     for gem in $gems_to_install; do
         echo "Installing gem $gem"
-        gem install $gem
+        gem install --no-document $gem
     done
 fi
 
@@ -52,7 +48,7 @@ for toolset_version in ${toolset_versions[@]}; do
     echo "Expand '$package_tar_name' to the '$ruby_version_path' folder"
     tar xf "$package_archive_path" -C $ruby_version_path
 
-    complete_file_path="$ruby_version_path/$ARCH.complete"
+    complete_file_path="$ruby_version_path/x64.complete"
     if [[ ! -f $complete_file_path ]]; then
         echo "Create complete file"
         touch $complete_file_path

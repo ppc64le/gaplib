@@ -23,11 +23,11 @@ if [[ "$IMAGE_OS" == *"ubuntu"* ]]; then
     # Install Configure apt
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-apt.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 elif [[ "$IMAGE_OS" == *"centos"* ]]; then
     # Add apt wrapper to implement retries
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-yum-mock.sh"
@@ -36,11 +36,11 @@ elif [[ "$IMAGE_OS" == *"centos"* ]]; then
     # Install Configure apt
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dnf.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dnfpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" 
+    run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dnfpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" 
 
 fi
 
@@ -51,15 +51,15 @@ SCRIPT_FILES=()
 if [ "$SETUP" == "minimal" ]; then
     # List of scripts to be executed
     SCRIPT_FILES=(
-        "install-dotnetcore-sdk.sh"
-        "install-runner-package.sh"
-        "install-actions-cache.sh"
-        "install-git.sh"
-        "install-git-lfs.sh"
-        "install-github-cli.sh"
-        "install-snap.sh"
-        "install-lxd.sh"
-        "install-zstd.sh"
+        # "install-dotnetcore-sdk.sh"
+        # "install-runner-package.sh"
+        # "install-actions-cache.sh"
+        # "install-git.sh"
+        # "install-git-lfs.sh"
+        # "install-github-cli.sh"
+        # "install-snap.sh"
+        # "install-lxd.sh"
+        # "install-zstd.sh"
     )
 elif [ "$SETUP" == "complete" ]; then
     # List of scripts to be executed
@@ -122,9 +122,9 @@ elif [ "$SETUP" == "complete" ]; then
         "install-lxd.sh"
         "install-zstd.sh"
     )
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-pipx-packages.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-pipx-packages.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    run_script "${INSTALLER_SCRIPT_FOLDER}/install-homebrew.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-homebrew.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 else
     echo "Invalid SETUP value. Please set SETUP to 'minimal' or 'complete'."
     exit 1
@@ -136,9 +136,9 @@ for SCRIPT_FILE in "${SCRIPT_FILES[@]}"; do
     run_script "$SCRIPT_PATH" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
 done
 
-run_script "${INSTALLER_SCRIPT_FOLDER}/install-docker.sh" "DOCKERHUB_PULL_IMAGES" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+# run_script "${INSTALLER_SCRIPT_FOLDER}/install-docker.sh" "DOCKERHUB_PULL_IMAGES" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
+# run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
 
 # echo 'Rebooting VM...'
 # sudo reboot
@@ -147,4 +147,4 @@ run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH
 "${INSTALLER_SCRIPT_FOLDER}/cleanup.sh"
 
 # Configure system settings
-run_script "${INSTALLER_SCRIPT_FOLDER}/configure-system.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "IMAGE_FOLDER"
+# run_script "${INSTALLER_SCRIPT_FOLDER}/configure-system.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"

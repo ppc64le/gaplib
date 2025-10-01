@@ -4,6 +4,7 @@
 ##  Desc:  Install CMake
 ##  Supply chain security: CMake - checksum validation
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 

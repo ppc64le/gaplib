@@ -3,17 +3,11 @@
 ##  File:  install-php.sh
 ##  Desc:  Install php
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/etc-environment.sh
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
-
-# add repository for old Ubuntu images
-# details in thread: https://github.com/actions/runner-images/issues/6331
-if is_ubuntu20; then
-    apt-add-repository ppa:ondrej/php -y
-    update_dpkgs
-fi
 
 # Install PHP
 php_versions=$(get_toolset_value '.php.versions[]')
@@ -101,10 +95,3 @@ mkdir -p /etc/skel/.composer
 # Install phpunit (for PHP)
 wget -q -O phpunit https://phar.phpunit.de/phpunit-8.phar
 install phpunit /usr/local/bin/phpunit
-
-# ubuntu 20.04 libzip-dev is libzip5 based and is not compatible libzip-dev of ppa:ondrej/php
-# see https://github.com/actions/runner-images/issues/1084
-if is_ubuntu20; then
-    rm /etc/apt/sources.list.d/ondrej-*.list
-    update_dpkgs
-fi

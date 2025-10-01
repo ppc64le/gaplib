@@ -3,6 +3,7 @@
 ##  File:  install-java-tools.sh
 ##  Desc:  Install Java and related tooling (Ant, Gradle, Maven)
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh
@@ -106,7 +107,7 @@ mavenVersion=$(get_toolset_value '.java.maven')
 mavenDownloadUrl="https://dlcdn.apache.org/maven/maven-3/${mavenVersion}/binaries/apache-maven-${mavenVersion}-bin.zip"
 maven_archive_path=$(download_with_retry "$mavenDownloadUrl")
 unzip -qq -d /usr/share "$maven_archive_path"
-rm -f /usr/bin/mvn && ln -s /usr/share/apache-maven-${mavenVersion}/bin/mvn /usr/bin/mvn
+ln -s /usr/share/apache-maven-${mavenVersion}/bin/mvn /usr/bin/mvn
 
 # Install Gradle
 # This script founds the latest gradle release from https://services.gradle.org/versions/all

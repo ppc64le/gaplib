@@ -3,6 +3,7 @@
 ##  File:  configure-image-data.sh
 ##  Desc:  Create a file with image data and documentation links
 ################################################################################
+
 imagedata_file=$IMAGEDATA_FILE
 image_version=$IMAGE_VERSION
 image_version_major=${image_version/.*/}

@@ -4,6 +4,7 @@
 ##  Desc:  Install ORAS CLI
 ##  Supply chain security: ORAS CLI - checksum validation
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 

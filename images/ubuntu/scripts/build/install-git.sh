@@ -3,6 +3,7 @@
 ##  File:  install-git.sh
 ##  Desc:  Install Git and Git-FTP
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 
@@ -23,7 +24,7 @@ EOF
 install_dpkgs git-ftp
 
 # Remove source repo's
-add-apt-repository --remove -y $GIT_REPO
+add-apt-repository --remove $GIT_REPO
 
 # Document apt source repo's
 echo "git-core $GIT_REPO" >> $HELPER_SCRIPTS/apt-sources.txt

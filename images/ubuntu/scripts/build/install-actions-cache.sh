@@ -4,6 +4,7 @@
 ##  Desc:       Download latest release from https://github.com/actions/action-versions
 ##  Maintainer: #actions-runtime and @TingluoHuang
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh

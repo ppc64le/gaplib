@@ -3,6 +3,7 @@
 ##  File:  install-mysql.sh
 ##  Desc:  Install MySQL Client
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh

@@ -4,11 +4,10 @@
 ##  Desc:  Install the AWS CLI, Session Manager plugin for the AWS CLI, and AWS SAM CLI
 ##  Supply chain security: AWS SAM CLI - checksum validation
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
-
-ARCH=${ARCH:-$(uname -m)}
 
 if [[ "$ARCH" == "ppc64le" ]]; then 
     # Placeholder for ppc64le-specific logic

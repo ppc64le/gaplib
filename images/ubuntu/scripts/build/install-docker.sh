@@ -4,6 +4,7 @@
 ##  Desc:  Install docker onto the image
 ##  Supply chain security: amazon-ecr-credential-helper - dynamic checksum validation
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 

@@ -144,8 +144,8 @@ build_image() {
     return 1 # Exit with an error code to trigger the trap and signal failure
   fi
 
-  msg "Adding runner user to required groups"
-  lxc exec "${BUILD_CONTAINER}" --user 0 --group 0 -- bash -c "usermod -aG adm,users,systemd-journal,docker runner"
+  # msg "Adding runner user to required groups"
+  # lxc exec "${BUILD_CONTAINER}" --user 0 --group 0 -- bash -c "usermod -aG adm,users,systemd-journal,docker runner"
 
   msg "Clearing APT cache"
   lxc exec "${BUILD_CONTAINER}" -- apt-get -y -qq clean
@@ -163,43 +163,43 @@ build_image() {
 
   msg "Lock acquired. Proceeding with atomic image publication."
 
-  msg "Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
-  if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
-    FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
-    if [ -n "${FINGERPRINT}" ]; then
-        msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
-        lxc image delete "${FINGERPRINT}"
-        msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
-    else
-        msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
-        exit 1
-    fi
-  else
-    msg "No existing image/alias named ${IMAGE_ALIAS} found."
-  fi
+  # msg "Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
+  # if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
+  #   FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
+  #   if [ -n "${FINGERPRINT}" ]; then
+  #       msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
+  #       lxc image delete "${FINGERPRINT}"
+  #       msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
+  #   else
+  #       msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
+  #       exit 1
+  #   fi
+  # else
+  #   msg "No existing image/alias named ${IMAGE_ALIAS} found."
+  # fi
 
-  msg "Runner build complete. Creating image snapshot."
-  lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
+  # msg "Runner build complete. Creating image snapshot."
+  # lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
 
-  msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
-  lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
-    --compression none \
-    description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
-    properties.build.commit="${BUILD_SHA}" \
-    properties.build.date="${BUILD_DATE}"
+  # msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
+  # lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
+  #   --compression none \
+  #   description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
+  #   properties.build.commit="${BUILD_SHA}" \
+  #   properties.build.date="${BUILD_DATE}"
 
   msg "Image publication complete. Releasing lock."
   # The lock on FD 200 is automatically released when the script or function exits.
   # ---------------------- CRITICAL SECTION END ----------------------
 
   msg "Export the image to ${EXPORT} for use elsewhere"
-  lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
+  # lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
 
-  local PRIMER_CONTAINER
-  PRIMER_CONTAINER="primer-$(date +%s)"
-  msg "Priming the filesystem by launching the newly built container"
-  lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
-  lxc rm -f "${PRIMER_CONTAINER}"
+  # local PRIMER_CONTAINER
+  # PRIMER_CONTAINER="primer-$(date +%s)"
+  # msg "Priming the filesystem by launching the newly built container"
+  # lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
+  # lxc rm -f "${PRIMER_CONTAINER}"
 
   # Before exiting successfully, clear the trap so it doesn't run again on the main script's exit.
   trap - INT TERM EXIT

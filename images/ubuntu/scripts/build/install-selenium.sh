@@ -3,6 +3,7 @@
 ##  File:  install-selenium.sh
 ##  Desc:  Install selenium server
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh

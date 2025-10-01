@@ -3,6 +3,7 @@
 ##  File:  install-bicep.sh
 ##  Desc:  Install bicep cli
 ################################################################################
+
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 
