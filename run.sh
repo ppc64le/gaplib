@@ -67,7 +67,7 @@ get_os_details() {
     case "$os_choice" in
         "Ubuntu")
             local version
-            version=$(select_menu "Select Ubuntu version: " "24.04" "24.10" "22.04" "Back")
+            version=$(select_menu "Select Ubuntu version: " "24.04" "22.04" "Back")
             [[ "$version" == "Back" ]] && return 1
             echo "ubuntu $version"
             ;;

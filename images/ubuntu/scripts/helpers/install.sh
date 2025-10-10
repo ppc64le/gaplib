@@ -241,27 +241,13 @@ use_checksum_comparison() {
     fi
 }
 
-# Function to check the status of a service and restart it if necessary
+# Ensures a systemd service is active, starting it if necessary.
 ensure_service_is_active() {
-    local service_name=$1
-
-    echo "Checking the status of the '$service_name' service..."
-
-    # Check if the service is already active
-    if sudo systemctl is-active --quiet "$service_name"; then
-        echo "'$service_name' service is already active and running."
-    else
-        echo "'$service_name' service is not active. Attempting to restart it..."
-        sudo systemctl restart "$service_name"
-        
-        # Wait and verify if the service becomes active after the restart
-        echo "Waiting for '$service_name' to become active..."
-        if sudo systemctl is-active --quiet "$service_name"; then
-            echo "'$service_name' service is now active."
-        else
-            echo "Failed to start the '$service_name' service after restart."
-            exit 1  # Exit the script if the service fails to start
-        fi
+    local service="$1"
+    # 'systemctl is-active' is quiet and returns 0 if active.
+    if ! systemctl is-active --quiet "$service"; then
+        echo "Service '$service' is not running. Attempting to start it..."
+        systemctl restart "$service"
     fi
 }
 

@@ -16,7 +16,7 @@ do
     sleep 2
 done
 
-cd /opt/runner
+cd /opt/runner-cache
 
 # register the runner
 export DOTNET_ROOT=/opt/dotnet

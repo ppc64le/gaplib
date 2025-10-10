@@ -12,14 +12,19 @@ create_java_environment_variable() {
     local java_version=$1
     local default=$2
 
-    if [ "$ARCH" = "ppc64le" ]; then
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
-        java_version_path="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
-    elif [ "$ARCH" = "s390x" ]; then
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-s390x"
-    else
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-amd64"
-    fi
+    # Set architecture-specific variables using a case statement for clarity
+    case "$ARCH" in
+        "ppc64le")
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
+            java_version_path="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
+            ;;
+        "x86_64")
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-amd64"
+            ;;
+        "s390x" | *)
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-${ARCH}"
+            ;;
+    esac
 
     if [[ ${default} == "True" ]]; then
         echo "Setting up JAVA_HOME variable to ${install_path_pattern}"

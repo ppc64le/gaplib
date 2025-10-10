@@ -62,9 +62,9 @@ FROM localhost/runner:ubuntu
 ARG REPO
 ARG TOKEN
 
-RUN /opt/runner/config.sh --url ${REPO} --token ${TOKEN}
+RUN /opt/runner-cache/config.sh --url ${REPO} --token ${TOKEN}
 
-CMD /opt/runner/run.sh
+CMD /opt/runner-cache/run.sh
 ```  
 
 #### **Build Commands**  

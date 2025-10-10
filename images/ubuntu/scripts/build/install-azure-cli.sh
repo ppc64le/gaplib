@@ -4,18 +4,20 @@
 ##  Desc:  Install Azure CLI (az)
 ################################################################################
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    # Install Azure CLI (instructions taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-    curl -fsSL https://aka.ms/InstallAzureCLIDeb | sudo bash
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le" | "s390x")
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    *)
+        ;;
+esac
 
-    echo "azure-cli https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt" >> $HELPER_SCRIPTS/apt-sources.txt
+# Install Azure CLI (instructions taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+curl -fsSL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
-    rm -f /etc/apt/sources.list.d/azure-cli.list
-    rm -f /etc/apt/sources.list.d/azure-cli.list.save
-fi
+echo "azure-cli https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt" >> $HELPER_SCRIPTS/apt-sources.txt
+
+rm -f /etc/apt/sources.list.d/azure-cli.list
+rm -f /etc/apt/sources.list.d/azure-cli.list.save

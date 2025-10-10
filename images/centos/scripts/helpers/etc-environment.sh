@@ -3,8 +3,9 @@
 ##  File:  etc-environment.sh
 ##  Desc:  Helper functions for source and modify /etc/environment
 ################################################################################
+
 # NB: sed expression use '%' as a delimiter in order to simplify handling
-#     values containg slashes (i.e. directory path)
+#     values containing slashes (i.e. directory path)
 #     The values containing '%' will break the functions
 
 get_etc_environment_variable() {

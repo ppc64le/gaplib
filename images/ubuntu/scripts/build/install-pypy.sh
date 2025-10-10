@@ -7,6 +7,26 @@
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le")
+        update_dpkgs 
+        install_dpkgs --no-install-recommends pypy
+        exit 0
+        ;;
+    "s390x")
+        # /tmp/pypy3.9-v7.3.16-s390x/bin/pypy3: error while loading shared libraries: libffi.so.6: cannot open shared object file:
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    "x86_64")
+        package_arch="x64"
+        ;;
+    *)
+        package_arch="$ARCH"
+        ;;
+esac
+
 # This function installs PyPy using the specified arguments:
 #   $1=package_url
 install_pypy() {
@@ -40,7 +60,7 @@ install_pypy() {
     # PyPy folder structure
     pypy_toolcache_path=$AGENT_TOOLSDIRECTORY/PyPy
     pypy_toolcache_version_path=$pypy_toolcache_path/$python_full_version
-    pypy_toolcache_version_arch_path=$pypy_toolcache_version_path/x64
+    pypy_toolcache_version_arch_path=$pypy_toolcache_version_path/${package_arch}
 
     echo "Check if PyPy hostedtoolcache folder exist..."
     if [ ! -d $pypy_toolcache_path ]; then
@@ -67,35 +87,27 @@ install_pypy() {
     ./python -m pip install --ignore-installed pip
 
     echo "Create complete file"
-    touch $pypy_toolcache_version_path/x64.complete
+    touch $pypy_toolcache_version_path/${package_arch}.complete
 
     echo "Remove '$package_tar_temp_path'"
     rm -f $package_tar_temp_path
 }
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    update_dpkgs 
-    install_dpkgs --no-install-recommends pypy
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    # Installation PyPy
-    pypy_versions_json=$(curl -fsSL https://downloads.python.org/pypy/versions.json)
-    toolset_versions=$(get_toolset_value '.toolcache[] | select(.name | contains("PyPy")) | .versions[]')
+# Installation PyPy
+pypy_versions_json=$(curl -fsSL https://downloads.python.org/pypy/versions.json)
+toolset_versions=$(get_toolset_value '.toolcache[] | select(.name | contains("PyPy")) | .versions[]')
 
-    for toolset_version in $toolset_versions; do
-        latest_major_pypy_version=$(echo $pypy_versions_json |
-            jq -r --arg toolset_version $toolset_version '.[]
-            | select((.python_version | startswith($toolset_version)) and .stable == true).files[]
-            | select(.arch == "x64" and .platform == "linux").download_url' | head -1)
-        if [[ -z "$latest_major_pypy_version" ]]; then
-            echo "Failed to get PyPy version '$toolset_version'"
-            exit 1
-        fi
+for toolset_version in $toolset_versions; do
+    latest_major_pypy_version=$(echo "$pypy_versions_json" | 
+        jq -r --arg toolset_version "$toolset_version" --arg arch "$package_arch" 'first(.[]
+        | select((.python_version | startswith($toolset_version)) and .stable == true) | .files[]
+        | select(.arch == $arch and .platform == "linux") | .download_url)')
+    if [[ -z "$latest_major_pypy_version" ]]; then
+        echo "Failed to get PyPy version '$toolset_version'"
+        exit 1
+    fi
 
-        install_pypy $latest_major_pypy_version
-    done
+    install_pypy $latest_major_pypy_version
+done
 
-    chown -R "$SUDO_USER:$SUDO_USER" "$AGENT_TOOLSDIRECTORY/PyPy"
-fi
+chown -R "$SUDO_USER:$SUDO_USER" "$AGENT_TOOLSDIRECTORY/PyPy"

@@ -24,7 +24,7 @@ EOF
 install_dpkgs git-ftp
 
 # Remove source repo's
-add-apt-repository --remove $GIT_REPO
+add-apt-repository --remove -y $GIT_REPO
 
 # Document apt source repo's
 echo "git-core $GIT_REPO" >> $HELPER_SCRIPTS/apt-sources.txt

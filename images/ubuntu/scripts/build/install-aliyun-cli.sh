@@ -9,25 +9,31 @@
 source $HELPER_SCRIPTS/os.sh
 source $HELPER_SCRIPTS/install.sh
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    # Install Alibaba Cloud CLI
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le" | "s390x")
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    "x86_64")
+        package_arch="amd64"
+        ;;
+    *)
+        package_arch="$ARCH"
+        ;;
+esac
+
+# Install Alibaba Cloud CLI
     
-    download_url=$(resolve_github_release_asset_url "aliyun/aliyun-cli" "contains(\"aliyun-cli-linux\") and endswith(\"amd64.tgz\")" "latest")
-    hash_url="https://github.com/aliyun/aliyun-cli/releases/latest/download/SHASUMS256.txt"
+download_url=$(resolve_github_release_asset_url "aliyun/aliyun-cli" "contains(\"aliyun-cli-linux\") and endswith(\"${package_arch}.tgz\")" "latest")
+hash_url="https://github.com/aliyun/aliyun-cli/releases/latest/download/SHASUMS256.txt"
     
-    archive_path=$(download_with_retry "$download_url")
+archive_path=$(download_with_retry "$download_url")
     
-    # Supply chain security - Alibaba Cloud CLI
-    external_hash=$(get_checksum_from_url "$hash_url" "aliyun-cli-linux.*amd64.tgz" "SHA256")
+# Supply chain security - Alibaba Cloud CLI
+external_hash=$(get_checksum_from_url "$hash_url" "aliyun-cli-linux.*${package_arch}.tgz" "SHA256")
     
-    use_checksum_comparison "$archive_path" "$external_hash"
+use_checksum_comparison "$archive_path" "$external_hash"
     
-    tar xzf "$archive_path"
-    mv aliyun /usr/local/bin
-fi
+tar xzf "$archive_path"
+mv aliyun /usr/local/bin

@@ -6,26 +6,29 @@
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    REPO_URL="https://cli-assets.heroku.com/channels/stable/apt"
-    GPG_KEY="/usr/share/keyrings/heroku.gpg"
-    REPO_PATH="/etc/apt/sources.list.d/heroku.list"
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le" | "s390x")
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    *)
+        ;;
+esac
 
-    # add heroku repository to apt
-    curl -fsSL "${REPO_URL}/release.key" | gpg --dearmor -o $GPG_KEY
-    echo "deb [trusted=yes] $REPO_URL ./" > $REPO_PATH
+REPO_URL="https://cli-assets.heroku.com/channels/stable/apt"
+GPG_KEY="/usr/share/keyrings/heroku.gpg"
+REPO_PATH="/etc/apt/sources.list.d/heroku.list"
 
-    # install heroku
-    update_dpkgs
-    install_dpkgs heroku
+# add heroku repository to apt
+curl -fsSL "${REPO_URL}/release.key" | gpg --dearmor -o $GPG_KEY
+echo "deb [trusted=yes] $REPO_URL ./" > $REPO_PATH
 
-    # remove heroku's apt repository
-    rm $REPO_PATH
-    rm $GPG_KEY
-fi
+# install heroku
+update_dpkgs
+install_dpkgs heroku
+
+# remove heroku's apt repository
+rm $REPO_PATH
+rm $GPG_KEY
+

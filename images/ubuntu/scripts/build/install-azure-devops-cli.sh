@@ -4,21 +4,23 @@
 ##  Desc:  Install Azure DevOps CLI (az devops)
 ################################################################################
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    # Source the helpers for use with the script
-    source $HELPER_SCRIPTS/etc-environment.sh
+# Source the helpers for use with the script
+source $HELPER_SCRIPTS/etc-environment.sh
 
-    # AZURE_EXTENSION_DIR shell variable defines where modules are installed
-    # https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview
-    export AZURE_EXTENSION_DIR=/opt/az/azcliextensions
-    set_etc_environment_variable "AZURE_EXTENSION_DIR" "${AZURE_EXTENSION_DIR}"
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le" | "s390x")
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    *)
+        ;;
+esac
 
-    # install azure devops Cli extension
-    az extension add -n azure-devops
-fi
+# AZURE_EXTENSION_DIR shell variable defines where modules are installed
+# https://docs.microsoft.com/en-us/cli/azure/azure-cli-extensions-overview
+export AZURE_EXTENSION_DIR=/opt/az/azcliextensions
+set_etc_environment_variable "AZURE_EXTENSION_DIR" "${AZURE_EXTENSION_DIR}"
+
+# install azure devops Cli extension
+az extension add -n azure-devops

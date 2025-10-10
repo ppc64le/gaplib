@@ -23,9 +23,9 @@ if [[ "$IMAGE_OS" == *"ubuntu"* ]]; then
     # Install Configure apt
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-apt.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS"
 
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-apt-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 elif [[ "$IMAGE_OS" == *"centos"* ]]; then
@@ -36,9 +36,9 @@ elif [[ "$IMAGE_OS" == *"centos"* ]]; then
     # Install Configure apt
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dnf.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS"
 
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-vital.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-dnf-common.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
     run_script "${INSTALLER_SCRIPT_FOLDER}/configure-dnfpkg.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" 
 
@@ -49,82 +49,143 @@ SCRIPT_FILES=()
 
 # Define scripts for each setup type
 if [ "$SETUP" == "minimal" ]; then
-    # List of scripts to be executed
+    # List of scripts to be executed for a minimal setup
     SCRIPT_FILES=(
-        # "install-dotnetcore-sdk.sh"
-        # "install-runner-package.sh"
-        # "install-actions-cache.sh"
-        # "install-git.sh"
-        # "install-git-lfs.sh"
-        # "install-github-cli.sh"
-        # "install-snap.sh"
-        # "install-lxd.sh"
-        # "install-zstd.sh"
-    )
-elif [ "$SETUP" == "complete" ]; then
-    # List of scripts to be executed
-    SCRIPT_FILES=(
+        "install-actions-cache.sh"
         "install-dotnetcore-sdk.sh"
         "install-runner-package.sh"
-        "install-actions-cache.sh"
-        "install-azcopy.sh"
-        "install-azure-cli.sh"
-        "install-azure-devops-cli.sh"
-        "install-bicep.sh"
-        "install-aliyun-cli.sh"
-        "install-apache.sh"
-        "install-aws-tools.sh"
-        "install-clang.sh"
-        "install-swift.sh"
-        "install-cmake.sh"
-        "install-codeql-bundle.sh"
-        "install-container-tools.sh"
-        "install-firefox.sh"
-        "install-microsoft-edge.sh"
-        "install-gcc-compilers.sh"
-        "install-gfortran.sh"
         "install-git.sh"
         "install-git-lfs.sh"
         "install-github-cli.sh"
-        "install-google-chrome.sh"
-        "install-google-cloud-cli.sh"
-        "install-haskell.sh"
-        "install-heroku.sh"
-        "install-java-tools.sh"
-        "install-kubernetes-tools.sh"
-        "install-oc-cli.sh"
-        "install-leiningen.sh"
-        "install-miniconda.sh"
-        "install-kotlin.sh"
-        "install-mysql.sh"
-        "install-mssql-tools.sh"
-        "install-sqlpackage.sh"
-        "install-nginx.sh"
-        "install-nvm.sh"
-        "install-nodejs.sh"
-        "install-bazel.sh"
-        "install-php.sh"
-        "install-postgresql.sh"
-        "install-pulumi.sh"
-        "install-ruby.sh"
-        "install-rlang.sh"
-        "install-rust.sh"
-        "install-julia.sh"
-        "install-selenium.sh"
-        "install-terraform.sh"
-        "install-packer.sh"
-        "install-vcpkg.sh"
-        "install-yq.sh"
-        "install-android-sdk.sh"
-        "install-pypy.sh"
-        "install-python.sh"
         "install-snap.sh"
         "install-lxd.sh"
         "install-zstd.sh"
     )
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-pipx-packages.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
-
-    # run_script "${INSTALLER_SCRIPT_FOLDER}/install-homebrew.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+elif [ "$SETUP" == "complete" ]; then
+    echo "Starting complete setup for $IMAGE_VERSION"
+    if [[ "$IMAGE_VERSION" == "24.04" ]]; then
+        # List of scripts to be executed
+        SCRIPT_FILES=(
+            "install-actions-cache.sh"
+            "install-dotnetcore-sdk.sh"
+            "install-runner-package.sh"
+            "install-azcopy.sh"
+            "install-azure-cli.sh"
+            "install-azure-devops-cli.sh"
+            "install-bicep.sh"
+            "install-apache.sh"
+            "install-aws-tools.sh"
+            "install-clang.sh"
+            "install-swift.sh"
+            "install-cmake.sh"
+            "install-codeql-bundle.sh"
+            "install-container-tools.sh"
+            "install-microsoft-edge.sh"
+            "install-gcc-compilers.sh"
+            "install-firefox.sh"
+            "install-gfortran.sh"
+            "install-git.sh"
+            "install-git-lfs.sh"
+            "install-github-cli.sh"
+            "install-google-chrome.sh"
+            "install-google-cloud-cli.sh"
+            "install-haskell.sh"
+            "install-java-tools.sh"
+            "install-kubernetes-tools.sh"
+            "install-miniconda.sh"
+            "install-kotlin.sh"
+            "install-mysql.sh"
+            "install-nginx.sh"
+            "install-nvm.sh"
+            "install-nodejs.sh"
+            "install-bazel.sh"
+            "install-php.sh"
+            "install-postgresql.sh"
+            "install-pulumi.sh"
+            "install-ruby.sh"
+            "install-rust.sh"
+            "install-julia.sh"
+            "install-selenium.sh"
+            "install-packer.sh"
+            "install-vcpkg.sh"
+            "install-yq.sh"
+            "install-android-sdk.sh"
+            "install-pypy.sh"
+            "install-python.sh"
+            "install-snap.sh"
+            "install-lxd.sh"
+            "install-zstd.sh"
+            "install-ninja.sh"
+        )
+    elif [[ "$IMAGE_VERSION" == "22.04" ]]; then
+        # List of scripts to be executed
+        SCRIPT_FILES=(
+            "install-actions-cache.sh"
+            "install-dotnetcore-sdk.sh"
+            "install-runner-package.sh"
+            "install-azcopy.sh"
+            "install-azure-cli.sh"
+            "install-azure-devops-cli.sh"
+            "install-bicep.sh"
+            "install-aliyun-cli.sh"
+            "install-apache.sh"
+            "install-aws-tools.sh"
+            "install-clang.sh"
+            "install-swift.sh"
+            "install-cmake.sh"
+            "install-codeql-bundle.sh"
+            "install-container-tools.sh"
+            "install-firefox.sh"
+            "install-microsoft-edge.sh"
+            "install-gcc-compilers.sh"
+            "install-gfortran.sh"
+            "install-git.sh"
+            "install-git-lfs.sh"
+            "install-github-cli.sh"
+            "install-google-chrome.sh"
+            "install-google-cloud-cli.sh"
+            "install-haskell.sh"
+            "install-heroku.sh"
+            "install-java-tools.sh"
+            "install-kubernetes-tools.sh"
+            "install-oc-cli.sh"
+            "install-leiningen.sh"
+            "install-miniconda.sh"
+            "install-mono.sh"
+            "install-kotlin.sh"
+            "install-mysql.sh"
+            "install-mssql-tools.sh"
+            "install-sqlpackage.sh"
+            "install-nginx.sh"
+            "install-nvm.sh"
+            "install-nodejs.sh"
+            "install-bazel.sh"
+            "install-oras-cli.sh"
+            "install-php.sh"
+            "install-postgresql.sh"
+            "install-pulumi.sh"
+            "install-ruby.sh"
+            "install-rlang.sh"
+            "install-rust.sh"
+            "install-julia.sh"
+            "install-sbt.sh"
+            "install-selenium.sh"
+            "install-terraform.sh"
+            "install-packer.sh"
+            "install-vcpkg.sh"
+            "install-yq.sh"
+            "install-android-sdk.sh"
+            "install-pypy.sh"
+            "install-python.sh"
+            "install-snap.sh"
+            "install-lxd.sh"
+            "install-zstd.sh"
+            "install-ninja.sh"
+        )
+    else
+        echo "Invalid IMAGE_VERSION value for complete setup. Please set IMAGE_VERSION to contain '22.04' or '24.04'."
+        exit 1
+    fi
 else
     echo "Invalid SETUP value. Please set SETUP to 'minimal' or 'complete'."
     exit 1
@@ -136,9 +197,13 @@ for SCRIPT_FILE in "${SCRIPT_FILES[@]}"; do
     run_script "$SCRIPT_PATH" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
 done
 
-# run_script "${INSTALLER_SCRIPT_FOLDER}/install-docker.sh" "DOCKERHUB_PULL_IMAGES" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+run_script "${INSTALLER_SCRIPT_FOLDER}/install-docker.sh" "DOCKERHUB_PULL_IMAGES" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+    
+run_script "${INSTALLER_SCRIPT_FOLDER}/install-pipx-packages.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
-# run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
+run_script "${INSTALLER_SCRIPT_FOLDER}/install-homebrew.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
+
+run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
 
 # echo 'Rebooting VM...'
 # sudo reboot
@@ -147,4 +212,4 @@ done
 "${INSTALLER_SCRIPT_FOLDER}/cleanup.sh"
 
 # Configure system settings
-# run_script "${INSTALLER_SCRIPT_FOLDER}/configure-system.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
+run_script "${INSTALLER_SCRIPT_FOLDER}/configure-system.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"

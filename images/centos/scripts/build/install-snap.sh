@@ -8,8 +8,8 @@ source $HELPER_SCRIPTS/install.sh
 # Install snapd if not already installed
 echo "Installing snapd..."
 if ! rpm -q snapd &>/dev/null; then
-    sudo dnf -y install epel-release
-    sudo dnf -y install snapd
+    update_dnfpkgs
+    install_dnfpkgs epel-release snapd
 else
     echo "snapd is already installed."
 fi

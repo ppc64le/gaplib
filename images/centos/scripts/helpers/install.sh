@@ -3,6 +3,7 @@
 ##  File:  install.sh
 ##  Desc:  Helper functions for installing tools
 ################################################################################
+
 download_with_retry() {
     local url=$1
     local download_path=$2
@@ -149,18 +150,22 @@ get_checksum_from_github_release() {
     fi
 
     matching_releases=$(get_github_releases_by_version "${repo}" "${version}" "${allow_pre_release}" "true")
-    # Find the checksum file URL
-    checksum_url=$(echo "$matching_releases" | jq -r --arg file "$file_name" '.assets[] | select(.name | endswith("\($file).sha256")) | .browser_download_url')
+    matched_line=$(printf "$(echo $matching_releases | jq '.body')\n" | grep "$file_name")
 
-    if [[ -z "$checksum_url" ]]; then
-        echo "Checksum file for $file_name not found in release assets" >&2
+    if [[ -z "$matched_line" ]]; then
+        echo "File name ${file_name} not found in release body" >&2
         exit 1
     fi
 
-    # Download and extract the hash
-    hash=$(curl -fsSL "$checksum_url" | awk '{print $1}')
+    if [[ "$(echo "$matched_line" | wc -l)" -gt 1 ]]; then
+        echo "Multiple matches found for ${file_name} in release body: ${matched_line}" >&2
+        exit 1
+    fi
+
+    hash=$(echo $matched_line | grep -oP "$hash_pattern")
+
     if [[ -z "$hash" ]]; then
-        echo "Failed to extract hash for $file_name" >&2
+        echo "Found ${file_name} in body of release, but failed to get hash from it: ${matched_line}" >&2
         exit 1
     fi
 
@@ -236,27 +241,13 @@ use_checksum_comparison() {
     fi
 }
 
-# Function to check the status of a service and restart it if necessary
+# Ensures a systemd service is active, starting it if necessary.
 ensure_service_is_active() {
-    local service_name=$1
-
-    echo "Checking the status of the '$service_name' service..."
-
-    # Check if the service is already active
-    if sudo systemctl is-active --quiet "$service_name"; then
-        echo "'$service_name' service is already active and running."
-    else
-        echo "'$service_name' service is not active. Attempting to restart it..."
-        sudo systemctl restart "$service_name"
-        
-        # Wait and verify if the service becomes active after the restart
-        echo "Waiting for '$service_name' to become active..."
-        if sudo systemctl is-active --quiet "$service_name"; then
-            echo "'$service_name' service is now active."
-        else
-            echo "Failed to start the '$service_name' service after restart."
-            exit 1  # Exit the script if the service fails to start
-        fi
+    local service="$1"
+    # 'systemctl is-active' is quiet and returns 0 if active.
+    if ! systemctl is-active --quiet "$service"; then
+        echo "Service '$service' is not running. Attempting to start it..."
+        systemctl restart "$service"
     fi
 }
 

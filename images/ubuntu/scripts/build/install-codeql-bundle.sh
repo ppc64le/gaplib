@@ -7,6 +7,16 @@
 # Source the helpers for use with the script
 source $HELPER_SCRIPTS/install.sh
 
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "x86_64")
+        package_arch="x64"
+        ;;
+    *)
+        package_arch="$ARCH"
+        ;;
+esac
+
 # Retrieve the latest major version of the CodeQL Action to use in the base URL for downloading the bundle.
 releases=$(curl -s "https://api.github.com/repos/github/codeql-action/releases")
 
@@ -32,7 +42,7 @@ echo "Downloading CodeQL bundle $bundle_version..."
 # different operating systems within containers.
 codeql_archive=$(download_with_retry "https://github.com/github/codeql-action/releases/download/$bundle_tag_name/codeql-bundle-linux64.tar.gz")
 
-codeql_toolcache_path="$AGENT_TOOLSDIRECTORY/CodeQL/$bundle_version/x64"
+codeql_toolcache_path="$AGENT_TOOLSDIRECTORY/CodeQL/$bundle_version/${package_arch}"
 mkdir -p "$codeql_toolcache_path"
 
 echo "Unpacking the downloaded CodeQL bundle archive..."

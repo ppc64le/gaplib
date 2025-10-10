@@ -8,36 +8,30 @@
 source $HELPER_SCRIPTS/install.sh
 source $HELPER_SCRIPTS/etc-environment.sh
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    # Mozillateam PPA is added manually because sometimes
-    # launchpad portal sends empty answer when trying to add it automatically
+# Mozillateam PPA is added manually because sometimes
+# launchpad portal sends empty answer when trying to add it automatically
 
-    REPO_URL="https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/"
-    GPG_FINGERPRINT="0ab215679c571d1c8325275b9bdb3d89ce49ec21"
-    GPG_KEY="/etc/apt/trusted.gpg.d/mozillateam_ubuntu_ppa.gpg"
-    REPO_PATH="/etc/apt/sources.list.d/mozillateam-ubuntu-ppa-focal.list"
+REPO_URL="https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/"
+GPG_FINGERPRINT="0ab215679c571d1c8325275b9bdb3d89ce49ec21"
+GPG_KEY="/etc/apt/trusted.gpg.d/mozillateam_ubuntu_ppa.gpg"
+REPO_PATH="/etc/apt/sources.list.d/mozillateam-ubuntu-ppa-focal.list"
     
-    # Install Firefox
-    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${GPG_FINGERPRINT}" | sudo gpg --dearmor -o $GPG_KEY
-    echo "deb $REPO_URL $(lsb_release -cs) main" > $REPO_PATH
+# Install Firefox
+curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${GPG_FINGERPRINT}" | sudo gpg --dearmor -o $GPG_KEY
+echo "deb $REPO_URL $(lsb_release -cs) main" > $REPO_PATH
 
-    update_dpkgs
-    install_dpkgs --target-release='o=LP-PPA-mozillateam' firefox
-    rm $REPO_PATH
+update_dpkgs
+install_dpkgs --target-release='o=LP-PPA-mozillateam' firefox
+rm $REPO_PATH
     
-    # Document apt source repo's
-    echo "mozillateam $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
+# Document apt source repo's
+echo "mozillateam $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
     
-    # add to global system preferences for firefox locale en_US, because other browsers have en_US local.
-    # Default firefox local is en_GB
-    echo 'pref("intl.locale.requested","en_US");' >> "/usr/lib/firefox/browser/defaults/preferences/syspref.js"
+# add to global system preferences for firefox locale en_US, because other browsers have en_US local.
+# Default firefox local is en_GB
+echo 'pref("intl.locale.requested","en_US");' >> "/usr/lib/firefox/browser/defaults/preferences/syspref.js"
     
+if [ "$ARCH" != "ppc64le" ] && [ "$ARCH" != "s390x" ]; then
     # Download and unpack latest release of geckodriver
     download_url=$(resolve_github_release_asset_url "mozilla/geckodriver" "test(\"linux64.tar.gz$\")" "latest")
     driver_archive_path=$(download_with_retry "$download_url")
