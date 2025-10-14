@@ -2,6 +2,7 @@
 
 while getopts r:t:l:n flag
 do
+    # shellcheck disable=SC2220
     case "${flag}" in
         r) repo=${OPTARG};;
         t) token=${OPTARG};;
@@ -10,13 +11,14 @@ do
     esac
 done
 
+# shellcheck disable=SC1035
 while !(ping -q -c 1 -W 1 google.com >/dev/null)
 do
     echo "waiting for internet connectivity..."
     sleep 2
 done
 
-cd /opt/runner-cache
+cd /opt/runner-cache || exit
 
 # register the runner
 export DOTNET_ROOT=/opt/dotnet

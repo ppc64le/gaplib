@@ -3,7 +3,7 @@
 set -euo pipefail 
 
 header() {
-    TS=`date +"%Y-%m-%dT%H:%M:%S%:z"`
+    TS=$(date +"%Y-%m-%dT%H:%M:%S%:z")
     echo "${TS} +--------------------------------------------+"
     echo "${TS} | $*"
     echo "${TS} +--------------------------------------------+"
@@ -11,7 +11,8 @@ header() {
 }
 
 msg() {
-    echo `date +"%Y-%m-%dT%H:%M:%S%:z"` $*
+    # shellcheck disable=SC2046
+    echo $(date +"%Y-%m-%dT%H:%M:%S%:z") "$*"
 }
 
 patch_runner() {
@@ -19,8 +20,9 @@ patch_runner() {
     cd /tmp
     git clone --tags -q "${RUNNERREPO}"
     cd runner
+    # shellcheck disable=SC2046
     git checkout $(git tag --sort=-v:refname | grep '^v[0-9]' | head -n1)
-    git apply --whitespace=nowarn ${IMAGE_FOLDER}/runner-sdk-8.patch
+    git apply --whitespace=nowarn "${IMAGE_FOLDER}"/runner-sdk-8.patch
     sed -i'' -e '/version/s/8......"$/8.0.100"/' src/global.json
 }
 
@@ -58,7 +60,7 @@ pre_cleanup() {
 }
 
 post_cleanup() {
-    sudo rm -rf ${IMAGE_FOLDER}/runner-sdk-8.patch \
+    sudo rm -rf "${IMAGE_FOLDER}"/runner-sdk-8.patch \
            /tmp/preseed-yaml /home/ubuntu/.nuget \
            /home/runner/.local/share
 }

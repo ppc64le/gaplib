@@ -6,7 +6,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 KOTLIN_ROOT="/usr/share"
 download_url=$(resolve_github_release_asset_url "JetBrains/kotlin" "contains(\"kotlin-compiler\") and endswith(\".zip\")" "latest")

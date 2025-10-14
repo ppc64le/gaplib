@@ -2,9 +2,12 @@
 
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
-source ${HELPERS_DIR}/setup_vars.sh
-source ${HELPERS_DIR}/setup_img.sh
-source ${HELPERS_DIR}/run_script.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_vars.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_img.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/run_script.sh
 
 usage() {
     echo "setup-build-env [flags]"
@@ -19,7 +22,8 @@ usage() {
 }
 
 msg() {
-    echo `date +"%Y-%m-%dT%H:%M:%S%:z"` $*
+    # shellcheck disable=SC2046
+    echo $(date +"%Y-%m-%dT%H:%M:%S%:z") "$*"
 }
 
 ensure_lxd() {
@@ -86,6 +90,7 @@ build_image() {
   BUILD_CONTAINER="gha-builder-$(date +%s)"
 
   # Trap INT (Ctrl+C), TERM (kill), and EXIT signals to guarantee cleanup.
+  # shellcheck disable=SC2064
   trap "{
     msg \"Signal caught! Executing cleanup for container ${BUILD_CONTAINER}...\"
     if lxc info \"${BUILD_CONTAINER}\" &>/dev/null; then
@@ -116,6 +121,7 @@ build_image() {
     return 2
   fi
 
+  # shellcheck disable=SC2154
   msg "Copy the ${image_folder} contents into the gha-builder"
   lxc file push "${image_folder}" "${BUILD_CONTAINER}/var/tmp/" --recursive
   lxc exec "${BUILD_CONTAINER}" ls "${image_folder}"
@@ -137,6 +143,8 @@ build_image() {
   lxc exec "${BUILD_CONTAINER}" --user 0 --group 0 -- bash -c "useradd -c 'Action Runner' -m -s /bin/bash runner && usermod -L runner && echo 'runner ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/runner && chmod 440 /etc/sudoers.d/runner"
 
   msg "Running build-image.sh"
+  # shellcheck disable=SC1073
+  # shellcheck disable=SC2154
   if ! lxc exec "${BUILD_CONTAINER}" --user 0 --group 0 -- \
     bash -c 'exec "$@"' _ "${helper_script_folder}/setup_install.sh" "${IMAGE_OS}" "${IMAGE_VERSION}" "${WORKER_TYPE}" "${WORKER_CPU}" "${SETUP}"; then
 
@@ -149,7 +157,7 @@ build_image() {
   
   msg "Clearing APT cache"
   lxc exec "${BUILD_CONTAINER}" -- apt-get -y -qq clean
-  lxc exec "${BUILD_CONTAINER}" -- rm -rf ${image_folder}
+  lxc exec "${BUILD_CONTAINER}" -- rm -rf "${image_folder}"
 
   # --------------------- CRITICAL SECTION START ---------------------
   # The following operations (delete, snapshot, publish) are not safe to run in parallel.
@@ -218,6 +226,8 @@ prolog() {
   ACTION_RUNNER="https://github.com/actions/runner"
   EXPORT="/opt/distro"
   HOST_OS_NAME=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"' | tr '[:upper:]' '[:lower:]' | awk '{print $1}')
+  # shellcheck disable=SC2034
+  # shellcheck disable=SC2002
   HOST_OS_VERSION=$(cat /etc/os-release | grep -E 'VERSION_ID' | cut -d'=' -f2 | tr -d '"')
   HOST_INSTALLER_SCRIPT_FOLDER="${HELPERS_DIR}/../../images/${HOST_OS_NAME}/scripts/build"
   BUILD_HOME="/home"

@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -28,16 +29,15 @@ else
     install_packages=(podman=3.4.4+ds1-1ubuntu1 buildah skopeo)
 fi
 
-
 if is_ubuntu22 && [ "$ARCH" != "ppc64le" ] && [ "$ARCH" != "s390x" ]; then
     # Install containernetworking-plugins for Ubuntu 22
-    curl -O http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-github-containernetworking-plugins/containernetworking-plugins_1.1.1+ds1-3build1_${package_arch}.deb
-    dpkg -i containernetworking-plugins_1.1.1+ds1-3build1_${package_arch}.deb
+    curl -O http://archive.ubuntu.com/ubuntu/pool/universe/g/golang-github-containernetworking-plugins/containernetworking-plugins_1.1.1+ds1-3build1_"${package_arch}".deb
+    dpkg -i containernetworking-plugins_1.1.1+ds1-3build1_"${package_arch}".deb
 fi
 
 # Install podman, buildah, skopeo container's tools
 update_dpkgs
-install_dpkgs ${install_packages[@]}
+install_dpkgs "${install_packages[@]}"
 mkdir -p /etc/containers
 printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | tee /etc/containers/registries.conf
 

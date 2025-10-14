@@ -5,8 +5,9 @@
 ##  Maintainer: #actions-runtime and @TingluoHuang
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Prepare directory and env variable for ACTIONS_RUNNER_ACTION_ARCHIVE_CACHE
 ACTION_ARCHIVE_CACHE_DIR=/opt/actionarchivecache

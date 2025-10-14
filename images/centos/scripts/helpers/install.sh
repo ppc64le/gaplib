@@ -49,7 +49,8 @@ get_toolset_value() {
     local toolset_path="${INSTALLER_SCRIPT_FOLDER}/toolset.json"
     local query=$1
 
-    echo "$(jq -r "$query" $toolset_path)"
+    # shellcheck disable=SC2005
+    echo "$(jq -r "$query" "$toolset_path")"
 }
 
 get_github_releases_by_version() {
@@ -68,27 +69,27 @@ get_github_releases_by_version() {
     fi
 
     if [[ $with_assets_only == "true" ]]; then
-        json=$(echo $json | jq -r '.[] | select(.assets | length > 0)')
+        json=$(echo "$json" | jq -r '.[] | select(.assets | length > 0)')
     else
-        json=$(echo $json | jq -r '.[]')
+        json=$(echo "$json" | jq -r '.[]')
     fi
 
     if [[ $allow_pre_release == "true" ]]; then
-        json=$(echo $json | jq -r '.')
+        json=$(echo "$json" | jq -r '.')
     else
-        json=$(echo $json | jq -r '. | select(.prerelease==false)')
+        json=$(echo "$json" | jq -r '. | select(.prerelease==false)')
     fi
 
     # Filter out rc/beta/etc releases, convert to numeric version and sort
-    json=$(echo $json | jq '. | select(.tag_name | test(".*-[a-z]|beta") | not)' | jq '.tag_name |= gsub("[^\\d.]"; "")' | jq -s 'sort_by(.tag_name | split(".") | map(tonumber))')
+    json=$(echo "$json" | jq '. | select(.tag_name | test(".*-[a-z]|beta") | not)' | jq '.tag_name |= gsub("[^\\d.]"; "")' | jq -s 'sort_by(.tag_name | split(".") | map(tonumber))')
 
     # Select releases matching version
     if [[ $version == "latest" ]]; then
-        json_filtered=$(echo $json | jq .[-1])
+        json_filtered=$(echo "$json" | jq .[-1])
     elif [[ $version == *"+"* ]] || [[ $version == *"*"* ]]; then
-        json_filtered=$(echo $json | jq --arg version $version '.[] | select(.tag_name | test($version))')
+        json_filtered=$(echo "$json" | jq --arg version "$version" '.[] | select(.tag_name | test($version))')
     else
-        json_filtered=$(echo $json | jq --arg version $version '.[] | select(.tag_name | contains($version))')
+        json_filtered=$(echo "$json" | jq --arg version "$version" '.[] | select(.tag_name | contains($version))')
     fi
 
     if [[ -z "$json_filtered" ]]; then
@@ -97,7 +98,7 @@ get_github_releases_by_version() {
         exit 1
     fi
 
-    echo $json_filtered
+    echo "$json_filtered"
 }
 
 resolve_github_release_asset_url() {
@@ -108,7 +109,7 @@ resolve_github_release_asset_url() {
     local allow_multiple_matches=${5:-false}
 
     matching_releases=$(get_github_releases_by_version "${repo}" "${version}" "${allow_pre_release}" "true")
-    matched_url=$(echo $matching_releases | jq -r ".assets[].browser_download_url | select(${url_filter})")
+    matched_url=$(echo "$matching_releases" | jq -r ".assets[].browser_download_url | select(${url_filter})")
 
     if [[ -z "$matched_url" ]]; then
         echo "Found no download urls matching pattern: ${url_filter}" >&2
@@ -125,7 +126,7 @@ resolve_github_release_asset_url() {
         fi
     fi
 
-    echo $matched_url
+    echo "$matched_url"
 }
 
 get_checksum_from_github_release() {
@@ -150,7 +151,8 @@ get_checksum_from_github_release() {
     fi
 
     matching_releases=$(get_github_releases_by_version "${repo}" "${version}" "${allow_pre_release}" "true")
-    matched_line=$(printf "$(echo $matching_releases | jq '.body')\n" | grep "$file_name")
+    # shellcheck disable=SC2059
+    matched_line=$(printf "$(echo "$matching_releases" | jq '.body')\n" | grep "$file_name")
 
     if [[ -z "$matched_line" ]]; then
         echo "File name ${file_name} not found in release body" >&2
@@ -162,7 +164,7 @@ get_checksum_from_github_release() {
         exit 1
     fi
 
-    hash=$(echo $matched_line | grep -oP "$hash_pattern")
+    hash=$(echo "$matched_line" | grep -oP "$hash_pattern")
 
     if [[ -z "$hash" ]]; then
         echo "Found ${file_name} in body of release, but failed to get hash from it: ${matched_line}" >&2
@@ -193,6 +195,7 @@ get_checksum_from_url() {
     checksums=$(cat "$checksums_file_path")
     rm "$checksums_file_path"
 
+    # shellcheck disable=SC2059
     matched_line=$(printf "$checksums\n" | grep "$file_name")
 
     if [[ "$(echo "$matched_line" | wc -l)" -gt 1 ]]; then
@@ -208,7 +211,7 @@ get_checksum_from_url() {
     if [[ $use_custom_search_pattern == "true" ]]; then
         hash=$(echo "$matched_line" | sed 's/  */ /g' | cut -d "$delimiter" -f "$word_number" | tr -d -c '[:alnum:]')
     else
-        hash=$(echo $matched_line | grep -oP "$hash_pattern")
+        hash=$(echo "$matched_line" | grep -oP "$hash_pattern")
     fi
 
     if [[ -z "$hash" ]]; then
@@ -255,6 +258,7 @@ install_dnfpkgs()
 {
     FLAGS=""
     PKGS=""
+    # shellcheck disable=SC2048
     for pkg in $*
     do
         case ${pkg} in
@@ -268,6 +272,7 @@ install_dnfpkgs()
     done
     for pkg in ${PKGS}
     do
+    	# shellcheck disable=SC2086
     	dnf install -y -qq ${FLAGS} ${pkg} 2>&1 >/dev/null | tee -a /tmp/install.errors
     done
 }

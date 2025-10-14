@@ -3,13 +3,16 @@
 ##  File:  configure-image-data.sh
 ##  Desc:  Create a file with image data and documentation links
 ################################################################################
-imagedata_file=$IMAGEDATA_FILE
-image_version=$IMAGE_VERSION
+# shellcheck disable=SC2153
+imagedata_file="$IMAGEDATA_FILE"
+image_version="$IMAGE_VERSION"
 image_version_major=${image_version/.*/} # Extract the major version
-image_version_minor=$(echo $image_version | cut -d "." -f 2) # Extract the minor version
+image_version_minor=$(echo "$image_version" | cut -d "." -f 2) # Extract the minor version
 
 # Determine OS name and version for CentOS
+# shellcheck disable=SC2002
 os_name=$(cat /etc/redhat-release | sed "s/ /\\\n/g") # Get OS name
+# shellcheck disable=SC1083
 os_version=$(rpm -E %{rhel}) # Get CentOS version
 image_label="centos-${os_version}" # Set image label
 
@@ -19,7 +22,7 @@ software_url="${github_url}/centos${os_version}/${image_version_major}.${image_v
 releaseUrl="https://github.com/actions/runner-images/releases/tag/centos${os_version}%2F${image_version_major}.${image_version_minor}"
 
 # Create the image data JSON file
-cat <<EOF > $imagedata_file
+cat <<EOF > "$imagedata_file"
 [
   {
     "group": "Operating System",

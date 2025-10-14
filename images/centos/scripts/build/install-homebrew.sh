@@ -6,8 +6,9 @@
 ################################################################################
 
 # Source the helpers
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -35,6 +36,6 @@ reload_etc_environment
 gfortran=$(brew --prefix)/bin/gfortran
 # Remove gfortran symlink, not to conflict with system gfortran
 if [[ -e $gfortran ]]; then
-    rm $gfortran
+    rm "$gfortran"
 fi
 

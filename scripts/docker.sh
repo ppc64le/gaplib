@@ -2,9 +2,12 @@
 
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
-source ${HELPERS_DIR}/setup_vars.sh
-source ${HELPERS_DIR}/setup_img.sh
-source ${HELPERS_DIR}/run_script.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_vars.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_img.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/run_script.sh
 
 # Function to ensure Docker is installed and available
 ensure_docker() {
@@ -35,6 +38,7 @@ build_image() {
         --build-arg ARCH="${ARCH}" \
         --tag "runner:${IMAGE_OS}.${IMAGE_VERSION}" .
 
+    # shellcheck disable=SC2181
     if [ $? -eq 0 ]; then
         echo "Docker image built successfully: runner:${IMAGE_OS}.${IMAGE_VERSION}"
     else
@@ -47,6 +51,7 @@ build_image() {
 run() {
     # Export system architecture
     HOST_OS_NAME=$(awk -F= '/^NAME/{print $2}' /etc/os-release | tr -d '"' | tr '[:upper:]' '[:lower:]' | awk '{print $1}')
+    # shellcheck disable=SC2002
     HOST_OS_VERSION=$(cat /etc/os-release | grep -E 'VERSION_ID' | cut -d'=' -f2 | tr -d '"')
     HOST_INSTALLER_SCRIPT_FOLDER="${HELPERS_DIR}/../../images/${HOST_OS_NAME}/scripts/build"
 

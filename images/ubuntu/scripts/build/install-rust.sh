@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/os.sh
 
 export RUSTUP_HOME=/etc/skel/.rustup
 export CARGO_HOME=/etc/skel/.cargo
@@ -27,4 +28,5 @@ fi
 rm -rf ${CARGO_HOME}/registry/*
 
 # Update /etc/environment
+# shellcheck disable=SC2016
 prepend_etc_environment_path '$HOME/.cargo/bin'

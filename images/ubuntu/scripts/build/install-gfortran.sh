@@ -5,13 +5,15 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 versions=$(get_toolset_value '.gfortran.versions[]')
 
+# shellcheck disable=SC2048
 for version in ${versions[*]}; do
     echo "Installing $version..."
-    install_dpkgs $version 
+    install_dpkgs "$version" 
 done
 
 echo "Install versionless gfortran (latest)"

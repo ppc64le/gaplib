@@ -35,9 +35,9 @@ set_etc_environment_variable() {
     local variable_value=$2
 
     if grep "^${variable_name}=" /etc/environment > /dev/null; then
-        replace_etc_environment_variable $variable_name $variable_value
+        replace_etc_environment_variable "$variable_name" "$variable_value"
     else
-        add_etc_environment_variable $variable_name $variable_value
+        add_etc_environment_variable "$variable_name" "$variable_value"
     fi
 }
 
@@ -82,6 +82,7 @@ append_etc_environment_path() {
 #       replace the values of the current environment
 reload_etc_environment() {
     # add `export ` to every variable of /etc/environemnt except PATH and eval the result shell script
+    # shellcheck disable=SC2046
     eval $(grep -v '^PATH=' /etc/environment | sed -e 's%^%export %')
     # handle PATH specially
     etc_path=$(get_etc_environment_variable PATH)

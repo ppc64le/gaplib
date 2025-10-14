@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -26,13 +27,13 @@ get_chromium_revision() {
     chrome_revision_prefix=${chrome_revision:0:${#chrome_revision}/2+1}
     SEARCH_URL="https://www.googleapis.com/storage/v1/b/chromium-browser-snapshots/o?delimiter=/&prefix=Linux_x64"
     # Revision can include a hash instead of a number. Need to filter it out https://github.com/actions/runner-images/issues/5256
-    revisions_available=$(curl -s $SEARCH_URL/${chrome_revision_prefix} | jq -r '.prefixes[]' | grep -E "Linux_x64\/[0-9]+\/"| cut -d "/" -f 2 | sort --version-sort)
+    revisions_available=$(curl -s "$SEARCH_URL/${chrome_revision_prefix}" | jq -r '.prefixes[]' | grep -E "Linux_x64\/[0-9]+\/"| cut -d "/" -f 2 | sort --version-sort)
 
     # If required Chromium revision is not found in the list
     # we should have to decrement the revision number until we find one.
     # This is mentioned in the documentation we use for this installation:
     # https://www.chromium.org/getting-involved/download-chromium
-    latest_valid_revision=$(echo $revisions_available | cut -f 1 -d " ")
+    latest_valid_revision=$(echo "$revisions_available" | cut -f 1 -d " ")
     for revision in $revisions_available; do
         if [ "$chrome_revision" -lt "$revision" ]; then
           break
@@ -41,7 +42,7 @@ get_chromium_revision() {
         latest_valid_revision=$revision
     done
 
-    echo $latest_valid_revision
+    echo "$latest_valid_revision"
 }
 
 # Download and install Google Chrome
@@ -79,7 +80,7 @@ set_etc_environment_variable "CHROMEWEBDRIVER" "${CHROMEDRIVER_DIR}"
 
 # Download and unpack Chromium
 chrome_revision=$(echo "${chrome_versions_json}" | jq -r '.builds["'"$chrome_version"'"].revision')
-chromium_revision=$(get_chromium_revision $chrome_revision)
+chromium_revision=$(get_chromium_revision "$chrome_revision")
 chromium_url="https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Linux_x64%2F${chromium_revision}%2Fchrome-linux.zip?alt=media"
 CHROMIUM_DIR="/usr/local/share/chromium"
 chromium_bin="${CHROMIUM_DIR}/chrome-linux/chrome"

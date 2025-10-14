@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in

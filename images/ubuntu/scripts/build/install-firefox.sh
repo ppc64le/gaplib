@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Mozillateam PPA is added manually because sometimes
 # launchpad portal sends empty answer when trying to add it automatically
@@ -25,7 +26,7 @@ install_dpkgs --target-release='o=LP-PPA-mozillateam' firefox
 rm $REPO_PATH
     
 # Document apt source repo's
-echo "mozillateam $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "mozillateam $REPO_URL" >> "$HELPER_SCRIPTS"/apt-sources.txt
     
 # add to global system preferences for firefox locale en_US, because other browsers have en_US local.
 # Default firefox local is en_GB

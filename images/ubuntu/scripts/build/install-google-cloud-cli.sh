@@ -4,7 +4,8 @@
 ##  Desc:  Install the Google Cloud CLI
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -29,4 +30,4 @@ rm /etc/apt/sources.list.d/google-cloud-sdk.list
 rm /usr/share/keyrings/cloud.google.gpg
 
 # add repo to the apt-sources.txt
-echo "google-cloud-sdk $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "google-cloud-sdk $REPO_URL" >> "$HELPER_SCRIPTS"/apt-sources.txt

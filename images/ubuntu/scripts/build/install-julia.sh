@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -25,10 +26,10 @@ esac
 
 # get the latest julia version
 json=$(curl -fsSL "https://julialang-s3.julialang.org/bin/versions.json")
-julia_version=$(echo $json | jq -r --arg triplet "$triplet" '.[].files[] | select(.triplet==$triplet and (.version | contains("-") | not)).version' | sort -V | tail -n1)
+julia_version=$(echo "$json" | jq -r --arg triplet "$triplet" '.[].files[] | select(.triplet==$triplet and (.version | contains("-") | not)).version' | sort -V | tail -n1)
 
 # download julia archive
-julia_tar_url=$(echo $json | jq -r ".[].files[].url | select(endswith(\"julia-${julia_version}-${tar_arch_suffix}.tar.gz\"))")
+julia_tar_url=$(echo "$json" | jq -r ".[].files[].url | select(endswith(\"julia-${julia_version}-${tar_arch_suffix}.tar.gz\"))")
 julia_archive_path=$(download_with_retry "$julia_tar_url")
 
 # extract files and make symlink

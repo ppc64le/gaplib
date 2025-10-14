@@ -5,10 +5,11 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Install Miniconda
-curl -fsSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-${ARCH}.sh -o miniconda.sh \
+curl -fsSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-"${ARCH}".sh -o miniconda.sh \
     && chmod +x miniconda.sh \
     && ./miniconda.sh -b -p /usr/share/miniconda \
     && rm miniconda.sh

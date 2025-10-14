@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 SRC=$(readlink -f "${BASH_SOURCE[0]}")
 DIR=$(dirname "${SRC}")

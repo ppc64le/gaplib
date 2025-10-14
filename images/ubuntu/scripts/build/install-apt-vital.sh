@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 vital_packages=$(get_toolset_value .apt.vital_packages[])
-install_dpkgs --no-install-recommends $vital_packages
+install_dpkgs --no-install-recommends "$vital_packages"

@@ -4,8 +4,9 @@
 ##  Desc:  Configure system and environment
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Set ImageVersion and ImageOS env variables
 set_etc_environment_variable "ImageVersion" "${IMAGE_VERSION}"
@@ -16,6 +17,7 @@ set_etc_environment_variable "ACCEPT_EULA" "Y"
 
 # This directory is supposed to be created in $HOME and owned by user(https://github.com/actions/runner-images/issues/491)
 mkdir -p /etc/skel/.config/configstore
+# shellcheck disable=SC2016
 set_etc_environment_variable "XDG_CONFIG_HOME" '$HOME/.config'
 
 # Change waagent entries to use /mnt for swap file
@@ -52,6 +54,6 @@ echo 'vm.mmap_rnd_bits=28' | tee -a /etc/sysctl.conf
 # https://github.com/actions/runner-images/pull/7860
 netfilter_rule='/etc/udev/rules.d/50-netfilter.rules'
 rules_directory="$(dirname "${netfilter_rule}")"
-mkdir -p $rules_directory
+mkdir -p "$rules_directory"
 touch $netfilter_rule
 echo 'ACTION=="add", SUBSYSTEM=="module", KERNEL=="nf_conntrack", RUN+="/usr/sbin/sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1"' | tee -a $netfilter_rule

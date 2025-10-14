@@ -4,8 +4,10 @@ set -o pipefail  # Fail if any command in a pipeline fails
 
 CURRENT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-source ${CURRENT_DIR}/setup_vars.sh
-source ${CURRENT_DIR}/run_script.sh
+# shellcheck disable=SC1091
+source "${CURRENT_DIR}"/setup_vars.sh
+# shellcheck disable=SC1091
+source "${CURRENT_DIR}"/run_script.sh
 # Configure limits
 run_script "${INSTALLER_SCRIPT_FOLDER}/configure-limits.sh" 
 
@@ -57,6 +59,7 @@ if [ "$SETUP" == "minimal" ]; then
         "install-git.sh"
         "install-git-lfs.sh"
         "install-github-cli.sh"
+        "install-python.sh"
         "install-snap.sh"
         "install-lxd.sh"
         "install-zstd.sh"

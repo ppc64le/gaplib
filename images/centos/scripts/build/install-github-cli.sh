@@ -7,7 +7,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -25,12 +26,12 @@ esac
 
 # Download GitHub CLI
 gh_cli_url=$(resolve_github_release_asset_url "cli/cli" "contains(\"linux\") and contains(\"${package_arch}\") and endswith(\".deb\")" "latest")
-gh_cli_deb_path=$(download_with_retry "$gh_cli_url")
+gh_cli_rpm_path=$(download_with_retry "$gh_cli_url")
 
 # Supply chain security - GitHub CLI
 hash_url=$(resolve_github_release_asset_url "cli/cli" "endswith(\"checksums.txt\")" "latest")
-external_hash=$(get_checksum_from_url "$hash_url" "linux_${package_arch}.deb" "SHA256")
-use_checksum_comparison "$gh_cli_deb_path" "$external_hash"
+external_hash=$(get_checksum_from_url "$hash_url" "linux_${package_arch}.rpm" "SHA256")
+use_checksum_comparison "$gh_cli_rpm_path" "$external_hash"
 
 # Install GitHub CLI
-install_dnfpkgs "$gh_cli_deb_path"
+install_dnfpkgs "$gh_cli_rpm_path"

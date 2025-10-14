@@ -5,8 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 install_clang() {
     local version=$1
 
@@ -18,21 +18,23 @@ set_default_clang() {
     local version=$1
 
     echo "Make Clang ${version} default"
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-${version} 100
-    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-${version} 100
-    update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-${version} 100
-    update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-${version} 100
-    update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-${version} 100
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-"${version}" 100
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-"${version}" 100
+    update-alternatives --install /usr/bin/clang-format clang-format /usr/bin/clang-format-"${version}" 100
+    update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-"${version}" 100
+    update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-"${version}" 100
 }
 
 versions=$(get_toolset_value '.clang.versions[]')
 default_clang_version=$(get_toolset_value '.clang.default_version')
 
+# shellcheck disable=SC2048
 for version in ${versions[*]}; do
+    # shellcheck disable=SC2053
     if [[ $version != $default_clang_version ]]; then
-        install_clang $version
+        install_clang "$version"
     fi
 done
 
-install_clang $default_clang_version
-set_default_clang $default_clang_version
+install_clang "$default_clang_version"
+set_default_clang "$default_clang_version"

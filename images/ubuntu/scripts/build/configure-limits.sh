@@ -10,6 +10,7 @@ echo 'DefaultLimitNOFILE=65536' >> /etc/systemd/system.conf
 echo 'DefaultLimitSTACK=16M:infinity' >> /etc/systemd/system.conf
 
 # Raise Number of File Descriptors
+# shellcheck disable=SC2129
 echo '* soft nofile 65536' >> /etc/security/limits.conf
 echo '* hard nofile 65536' >> /etc/security/limits.conf
 

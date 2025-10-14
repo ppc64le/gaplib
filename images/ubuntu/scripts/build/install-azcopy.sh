@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Install AzCopy10
 archive_path=$(download_with_retry "https://aka.ms/downloadazcopy-v10-linux")

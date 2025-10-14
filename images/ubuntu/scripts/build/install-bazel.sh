@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -21,5 +22,5 @@ esac
 npm install -g @bazel/bazelisk
 
 # run bazelisk once in order to install /usr/local/bin/bazel binary
-sudo -u $SUDO_USER bazel version
+sudo -u "$SUDO_USER" bazel version
 

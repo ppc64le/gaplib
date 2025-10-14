@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/os.sh
 # This is the anti-frontend. It never interacts with you  at  all,
 # and  makes  the  default  answers  be used for all questions. It
 # might mail error messages to root, but that's it;  otherwise  it

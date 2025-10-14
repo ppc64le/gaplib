@@ -6,7 +6,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -22,6 +23,7 @@ if [[ "$ARCH" == "ppc64le" || "$ARCH" == "s390x" ]]; then
     export version="latest"
     install_dpkgs golang
     sudo go install sigs.k8s.io/kind@$version # v0.22.0
+    # shellcheck disable=SC2046
     sudo cp $(sudo go env GOPATH)/bin/kind /usr/local/bin/
     kind version
 else
@@ -53,7 +55,7 @@ else
     exit 1
 fi
     
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/'$kubectl_minor_version'/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/'"$kubectl_minor_version"'/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 update_dpkgs
 install_dpkgs kubectl
 rm -f /etc/apt/sources.list.d/kubernetes.list

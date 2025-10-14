@@ -4,7 +4,8 @@
 ##  Desc:  Configure apt sources with failover from Azure to Ubuntu archives.
 ################################################################################
 
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
 
 touch /etc/apt/apt-mirrors.txt
 

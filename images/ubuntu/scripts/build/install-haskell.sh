@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -38,8 +39,8 @@ major_minor_versions=$(echo "$available_versions" | cut -d"." -f 1,2 | uniq | ta
 for major_minor_version in $major_minor_versions; do
     full_version=$(echo "$available_versions" | grep "$major_minor_version." | tail -n1)
     echo "install ghc version $full_version..."
-    ghcup install ghc $full_version
-    ghcup set ghc $full_version
+    ghcup install ghc "$full_version"
+    ghcup set ghc "$full_version"
 done
 
 echo "install cabal..."

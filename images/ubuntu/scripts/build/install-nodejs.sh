@@ -5,19 +5,20 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Install default Node.js
 default_version=$(get_toolset_value '.node.default')
 curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n -o ~/n
-bash ~/n $default_version
+bash ~/n "$default_version"
 
 if [[ "$ARCH" == "ppc64le" || "$ARCH" == "s390x" ]]; then
     npm install -g grunt gulp n typescript newman vercel webpack webpack-cli yarn
 else
     # Install node modules
     node_modules=$(get_toolset_value '.node_modules[].name')
-    npm install -g $node_modules
+    npm install -g "$node_modules"
 fi
 
 echo "Creating the symlink for [now] command to vercel CLI"

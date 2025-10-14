@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -32,7 +33,7 @@ install_dpkgs --no-install-recommends microsoft-edge-stable
 rm $GPG_KEY
 rm $REPO_PATH
 
-echo "microsoft-edge $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "microsoft-edge $REPO_URL" >> "$HELPER_SCRIPTS"/apt-sources.txt
 
 # Install Microsoft Edge Webdriver
 
@@ -42,7 +43,7 @@ edgedriver_bin="$EDGEDRIVER_DIR/msedgedriver"
 mkdir -p $EDGEDRIVER_DIR
 
 edge_version=$(microsoft-edge --version | cut -d' ' -f 3)
-edge_version_major=$(echo $edge_version | cut -d'.' -f 1)
+edge_version_major=$(echo "$edge_version" | cut -d'.' -f 1)
 
 edgedriver_version_url="https://msedgedriver.microsoft.com/LATEST_RELEASE_${edge_version_major}_LINUX"
 # Convert a resulting file to normal UTF-8

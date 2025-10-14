@@ -5,7 +5,8 @@
 ##  Supply chain security: amazon-ecr-credential-helper - dynamic checksum validation
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Set architecture-specific variables using a case statement for clarity
 case "$ARCH" in
@@ -17,7 +18,7 @@ case "$ARCH" in
         ;;
 esac
 
-os_codename=$(. /etc/os-release && echo $VERSION_ID)
+os_codename=$(. /etc/os-release && echo "$VERSION_ID")
 dnf -y install dnf-plugins-core
 dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 

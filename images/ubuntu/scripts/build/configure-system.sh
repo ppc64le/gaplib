@@ -3,8 +3,9 @@
 ##  File: configure-system.sh
 ##  Desc: Post deployment system configuration actions
 ################################################################################
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/os.sh
 
 mv -f "${IMAGE_FOLDER}/post-generation" /opt
 
@@ -13,7 +14,7 @@ chmod -R 777 /opt
 echo "chmod -R 777 /usr/share"
 chmod -R 777 /usr/share
 
-chmod 755 $IMAGE_FOLDER
+chmod 755 "$IMAGE_FOLDER"
 
 # Remove quotes around PATH
 ENVPATH=$(grep 'PATH=' /etc/environment | head -n 1 | sed -z 's/^PATH=*//')

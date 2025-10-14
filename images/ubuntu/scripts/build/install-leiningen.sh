@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 LEIN_BIN=/usr/local/bin/lein
 curl -fsSL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein > $LEIN_BIN

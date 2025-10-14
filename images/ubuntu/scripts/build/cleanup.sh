@@ -41,4 +41,5 @@ after=$(df / -Pm | awk 'NR==2{print $4}')
 # display size
 echo "Before: $before MB"
 echo "After : $after MB"
+# shellcheck disable=SC2004
 echo "Delta : $(($after-$before)) MB"

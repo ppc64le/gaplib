@@ -5,7 +5,8 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 GIT_REPO="ppa:git-core/ppa"
 
@@ -27,7 +28,7 @@ install_dpkgs git-ftp
 add-apt-repository --remove -y $GIT_REPO
 
 # Document apt source repo's
-echo "git-core $GIT_REPO" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "git-core $GIT_REPO" >> "$HELPER_SCRIPTS"/apt-sources.txt
 
 # Add well-known SSH host keys to known_hosts
 ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> /etc/ssh/ssh_known_hosts
