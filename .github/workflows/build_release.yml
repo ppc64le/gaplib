@@ -16,7 +16,14 @@ jobs:
   # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
-    runs-on: [ ubuntu-24.04-s390x, ubuntu-24.04-ppc64le ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04-ppc64le
+            runner_owner: "ppc64le-hosted"
+          - os: ubuntu-24.04-s390x
+            runner_owner: "s390x-hosted"
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
