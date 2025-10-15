@@ -39,7 +39,34 @@ ensure_lxd() {
             exit 1
         fi
     else
-        echo "LXD is already installed. Version: $(lxd --version)"
+        echo "LXD is already installed. Checking its version..."
+
+        LATEST_LTS_CHANNEL=$(snap info lxd | grep -E '(^\s*[0-9]+\.0/stable)' | awk '{print $1}' | sed 's|/stable:||' | sort -rV | head -n 1)
+
+        # Get the currently tracked channel from the snap list output.
+        CURRENT_LTS_CHANNEL=$(snap list lxd | awk 'NR==2 {print $4}' | sed 's|/stable.*||')
+
+        echo "Currently installed channel: ${CURRENT_LTS_CHANNEL}"
+        echo "Latest available LTS channel: ${LATEST_LTS_CHANNEL}"
+
+        # Compare the current channel with the latest available LTS channel.
+        if [ "$CURRENT_LTS_CHANNEL" != "$LATEST_LTS_CHANNEL" ]; then
+            echo
+            echo "An upgrade is recommended."
+            echo "To prevent disruption to your existing setup, please upgrade manually."
+            echo "Run the following command to switch to the latest LTS channel:"
+            echo
+            echo "  sudo snap refresh lxd --channel=${LATEST_LTS_CHANNEL}/stable"
+            echo
+            echo "Note: Always back up your data before performing a channel switch."
+        else
+            echo "You are already on the latest available LXD LTS channel. No action needed."
+        fi
+        echo "Checking list of refreshable snaps..."
+        sudo snap refresh --list
+  
+        # Hold the autorefresh for LXD
+        sudo snap refresh --hold lxd
     fi
 }
 
