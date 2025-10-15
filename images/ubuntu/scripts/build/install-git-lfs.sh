@@ -3,8 +3,10 @@
 ##  File:  install-git-lfs.sh
 ##  Desc:  Install Git-lfs
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 GIT_LFS_REPO="https://packagecloud.io/install/repositories/github/git-lfs"
 
@@ -16,4 +18,4 @@ install_dpkgs git-lfs
 rm /etc/apt/sources.list.d/github_git-lfs.list
 
 # Document apt source repo's
-echo "git-lfs $GIT_LFS_REPO" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "git-lfs $GIT_LFS_REPO" >> "$HELPER_SCRIPTS"/apt-sources.txt

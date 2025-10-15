@@ -46,7 +46,7 @@ GapLib supports multiple environments for seamless runner setup:
 
 ### **Supported Operating Systems**
 
-- **Ubuntu**: Versions 22.04, 24.04, and 24.10.
+- **Ubuntu**: Versions 22.04, and 24.04.
 - **CentOS**: Version 9.
 
 ---

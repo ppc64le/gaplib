@@ -5,10 +5,12 @@
 ################################################################################
 
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Configure dnf to automatically answer 'yes' for package installation
 # This replaces the non-interactive mode typically set in DEBIAN_FRONTEND
+# shellcheck disable=SC2129
 echo "assumeyes=True" >> /etc/dnf/dnf.conf
 
 # Prevent dnf from prompting for confirmation on replacing configuration files

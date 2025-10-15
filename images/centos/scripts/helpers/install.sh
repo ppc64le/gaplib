@@ -3,6 +3,7 @@
 ##  File:  install.sh
 ##  Desc:  Helper functions for installing tools
 ################################################################################
+
 download_with_retry() {
     local url=$1
     local download_path=$2
@@ -48,7 +49,8 @@ get_toolset_value() {
     local toolset_path="${INSTALLER_SCRIPT_FOLDER}/toolset.json"
     local query=$1
 
-    echo "$(jq -r "$query" $toolset_path)"
+    # shellcheck disable=SC2005
+    echo "$(jq -r "$query" "$toolset_path")"
 }
 
 get_github_releases_by_version() {
@@ -67,27 +69,27 @@ get_github_releases_by_version() {
     fi
 
     if [[ $with_assets_only == "true" ]]; then
-        json=$(echo $json | jq -r '.[] | select(.assets | length > 0)')
+        json=$(echo "$json" | jq -r '.[] | select(.assets | length > 0)')
     else
-        json=$(echo $json | jq -r '.[]')
+        json=$(echo "$json" | jq -r '.[]')
     fi
 
     if [[ $allow_pre_release == "true" ]]; then
-        json=$(echo $json | jq -r '.')
+        json=$(echo "$json" | jq -r '.')
     else
-        json=$(echo $json | jq -r '. | select(.prerelease==false)')
+        json=$(echo "$json" | jq -r '. | select(.prerelease==false)')
     fi
 
     # Filter out rc/beta/etc releases, convert to numeric version and sort
-    json=$(echo $json | jq '. | select(.tag_name | test(".*-[a-z]|beta") | not)' | jq '.tag_name |= gsub("[^\\d.]"; "")' | jq -s 'sort_by(.tag_name | split(".") | map(tonumber))')
+    json=$(echo "$json" | jq '. | select(.tag_name | test(".*-[a-z]|beta") | not)' | jq '.tag_name |= gsub("[^\\d.]"; "")' | jq -s 'sort_by(.tag_name | split(".") | map(tonumber))')
 
     # Select releases matching version
     if [[ $version == "latest" ]]; then
-        json_filtered=$(echo $json | jq .[-1])
+        json_filtered=$(echo "$json" | jq .[-1])
     elif [[ $version == *"+"* ]] || [[ $version == *"*"* ]]; then
-        json_filtered=$(echo $json | jq --arg version $version '.[] | select(.tag_name | test($version))')
+        json_filtered=$(echo "$json" | jq --arg version "$version" '.[] | select(.tag_name | test($version))')
     else
-        json_filtered=$(echo $json | jq --arg version $version '.[] | select(.tag_name | contains($version))')
+        json_filtered=$(echo "$json" | jq --arg version "$version" '.[] | select(.tag_name | contains($version))')
     fi
 
     if [[ -z "$json_filtered" ]]; then
@@ -96,7 +98,7 @@ get_github_releases_by_version() {
         exit 1
     fi
 
-    echo $json_filtered
+    echo "$json_filtered"
 }
 
 resolve_github_release_asset_url() {
@@ -107,7 +109,7 @@ resolve_github_release_asset_url() {
     local allow_multiple_matches=${5:-false}
 
     matching_releases=$(get_github_releases_by_version "${repo}" "${version}" "${allow_pre_release}" "true")
-    matched_url=$(echo $matching_releases | jq -r ".assets[].browser_download_url | select(${url_filter})")
+    matched_url=$(echo "$matching_releases" | jq -r ".assets[].browser_download_url | select(${url_filter})")
 
     if [[ -z "$matched_url" ]]; then
         echo "Found no download urls matching pattern: ${url_filter}" >&2
@@ -124,7 +126,7 @@ resolve_github_release_asset_url() {
         fi
     fi
 
-    echo $matched_url
+    echo "$matched_url"
 }
 
 get_checksum_from_github_release() {
@@ -149,18 +151,23 @@ get_checksum_from_github_release() {
     fi
 
     matching_releases=$(get_github_releases_by_version "${repo}" "${version}" "${allow_pre_release}" "true")
-    # Find the checksum file URL
-    checksum_url=$(echo "$matching_releases" | jq -r --arg file "$file_name" '.assets[] | select(.name | endswith("\($file).sha256")) | .browser_download_url')
+    # shellcheck disable=SC2059
+    matched_line=$(printf "$(echo "$matching_releases" | jq '.body')\n" | grep "$file_name")
 
-    if [[ -z "$checksum_url" ]]; then
-        echo "Checksum file for $file_name not found in release assets" >&2
+    if [[ -z "$matched_line" ]]; then
+        echo "File name ${file_name} not found in release body" >&2
         exit 1
     fi
 
-    # Download and extract the hash
-    hash=$(curl -fsSL "$checksum_url" | awk '{print $1}')
+    if [[ "$(echo "$matched_line" | wc -l)" -gt 1 ]]; then
+        echo "Multiple matches found for ${file_name} in release body: ${matched_line}" >&2
+        exit 1
+    fi
+
+    hash=$(echo "$matched_line" | grep -oP "$hash_pattern")
+
     if [[ -z "$hash" ]]; then
-        echo "Failed to extract hash for $file_name" >&2
+        echo "Found ${file_name} in body of release, but failed to get hash from it: ${matched_line}" >&2
         exit 1
     fi
 
@@ -188,6 +195,7 @@ get_checksum_from_url() {
     checksums=$(cat "$checksums_file_path")
     rm "$checksums_file_path"
 
+    # shellcheck disable=SC2059
     matched_line=$(printf "$checksums\n" | grep "$file_name")
 
     if [[ "$(echo "$matched_line" | wc -l)" -gt 1 ]]; then
@@ -203,7 +211,7 @@ get_checksum_from_url() {
     if [[ $use_custom_search_pattern == "true" ]]; then
         hash=$(echo "$matched_line" | sed 's/  */ /g' | cut -d "$delimiter" -f "$word_number" | tr -d -c '[:alnum:]')
     else
-        hash=$(echo $matched_line | grep -oP "$hash_pattern")
+        hash=$(echo "$matched_line" | grep -oP "$hash_pattern")
     fi
 
     if [[ -z "$hash" ]]; then
@@ -236,27 +244,13 @@ use_checksum_comparison() {
     fi
 }
 
-# Function to check the status of a service and restart it if necessary
+# Ensures a systemd service is active, starting it if necessary.
 ensure_service_is_active() {
-    local service_name=$1
-
-    echo "Checking the status of the '$service_name' service..."
-
-    # Check if the service is already active
-    if sudo systemctl is-active --quiet "$service_name"; then
-        echo "'$service_name' service is already active and running."
-    else
-        echo "'$service_name' service is not active. Attempting to restart it..."
-        sudo systemctl restart "$service_name"
-        
-        # Wait and verify if the service becomes active after the restart
-        echo "Waiting for '$service_name' to become active..."
-        if sudo systemctl is-active --quiet "$service_name"; then
-            echo "'$service_name' service is now active."
-        else
-            echo "Failed to start the '$service_name' service after restart."
-            exit 1  # Exit the script if the service fails to start
-        fi
+    local service="$1"
+    # 'systemctl is-active' is quiet and returns 0 if active.
+    if ! systemctl is-active --quiet "$service"; then
+        echo "Service '$service' is not running. Attempting to start it..."
+        systemctl restart "$service"
     fi
 }
 
@@ -264,6 +258,7 @@ install_dnfpkgs()
 {
     FLAGS=""
     PKGS=""
+    # shellcheck disable=SC2048
     for pkg in $*
     do
         case ${pkg} in
@@ -277,6 +272,7 @@ install_dnfpkgs()
     done
     for pkg in ${PKGS}
     do
+    	# shellcheck disable=SC2086
     	dnf install -y -qq ${FLAGS} ${pkg} 2>&1 >/dev/null | tee -a /tmp/install.errors
     done
 }

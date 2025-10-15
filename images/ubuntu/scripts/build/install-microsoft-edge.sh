@@ -3,53 +3,58 @@
 ##  File:  install-microsoft-edge.sh
 ##  Desc:  Install Microsoft Edge and WebDriver
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
-if [[ "$ARCH" == "ppc64le" ]]; then 
-    # Placeholder for ppc64le-specific logic
-    echo "No actions defined for ppc64le architecture."
-elif [[ "$ARCH" == "s390x" ]]; then
-    # Placeholder for s390x-specific logic
-    echo "No actions defined for s390x architecture."
-else
-    REPO_URL="https://packages.microsoft.com/repos/edge"
-    GPG_KEY="/usr/share/keyrings/microsoft-edge.gpg"
-    REPO_PATH="/etc/apt/sources.list.d/microsoft-edge.list"
+# Set architecture-specific variables using a case statement for clarity
+case "$ARCH" in
+    "ppc64le" | "s390x")
+        echo "No actions defined for $ARCH architecture."
+        exit 0
+        ;;
+    *)
+        ;;
+esac
 
-    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > $GPG_KEY
-    # Specify an arch as Microsoft repository supports armhf and arm64 as well
-    echo "deb [arch=amd64 signed-by=$GPG_KEY] $REPO_URL stable main" > $REPO_PATH
+REPO_URL="https://packages.microsoft.com/repos/edge"
+GPG_KEY="/usr/share/keyrings/microsoft-edge.gpg"
+REPO_PATH="/etc/apt/sources.list.d/microsoft-edge.list"
 
-    update_dpkgs
-    install_dpkgs --no-install-recommends microsoft-edge-stable
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > $GPG_KEY
+# Specify an arch as Microsoft repository supports armhf and arm64 as well
+echo "deb [arch=amd64 signed-by=$GPG_KEY] $REPO_URL stable main" > $REPO_PATH
 
-    rm $GPG_KEY
-    rm $REPO_PATH
+update_dpkgs
+install_dpkgs --no-install-recommends microsoft-edge-stable
 
-    echo "microsoft-edge $REPO_URL" >> $HELPER_SCRIPTS/apt-sources.txt
+rm $GPG_KEY
+rm $REPO_PATH
 
-    # Install Microsoft Edge Webdriver
+echo "microsoft-edge $REPO_URL" >> "$HELPER_SCRIPTS"/apt-sources.txt
 
-    EDGEDRIVER_DIR="/usr/local/share/edge_driver"
-    edgedriver_bin="$EDGEDRIVER_DIR/msedgedriver"
+# Install Microsoft Edge Webdriver
 
-    mkdir -p $EDGEDRIVER_DIR
+EDGEDRIVER_DIR="/usr/local/share/edge_driver"
+edgedriver_bin="$EDGEDRIVER_DIR/msedgedriver"
 
-    edge_version=$(microsoft-edge --version | cut -d' ' -f 3)
-    edge_version_major=$(echo $edge_version | cut -d'.' -f 1)
+mkdir -p $EDGEDRIVER_DIR
 
-    edgedriver_version_url="https://msedgedriver.azureedge.net/LATEST_RELEASE_${edge_version_major}_LINUX"
-    # Convert a resulting file to normal UTF-8
-    edgedriver_latest_version=$(curl -fsSL "$edgedriver_version_url" | iconv -f utf-16 -t utf-8 | tr -d '\r')
+edge_version=$(microsoft-edge --version | cut -d' ' -f 3)
+edge_version_major=$(echo "$edge_version" | cut -d'.' -f 1)
 
-    edgedriver_url="https://msedgedriver.azureedge.net/${edgedriver_latest_version}/edgedriver_linux64.zip"
-    edgedriver_archive_path=$(download_with_retry "$edgedriver_url")
+edgedriver_version_url="https://msedgedriver.microsoft.com/LATEST_RELEASE_${edge_version_major}_LINUX"
+# Convert a resulting file to normal UTF-8
+edgedriver_latest_version=$(curl -fsSL "$edgedriver_version_url" | iconv -f utf-16 -t utf-8 | tr -d '\r')
 
-    unzip -qq "$edgedriver_archive_path" -d "$EDGEDRIVER_DIR"
-    chmod +x $edgedriver_bin
-    ln -s $edgedriver_bin /usr/bin
+edgedriver_url="https://msedgedriver.microsoft.com/${edgedriver_latest_version}/edgedriver_linux64.zip"
+edgedriver_archive_path=$(download_with_retry "$edgedriver_url")
 
-    set_etc_environment_variable "EDGEWEBDRIVER" "${EDGEDRIVER_DIR}"
-fi
+unzip -qq "$edgedriver_archive_path" -d "$EDGEDRIVER_DIR"
+chmod +x $edgedriver_bin
+ln -s $edgedriver_bin /usr/bin
+
+set_etc_environment_variable "EDGEWEBDRIVER" "${EDGEDRIVER_DIR}"
+

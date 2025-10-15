@@ -4,7 +4,8 @@
 ##  Desc:  Configure snap
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 # Update /etc/environment to include /snap/bin in PATH
 # because /etc/profile.d is ignored by `--norc` shell launch option

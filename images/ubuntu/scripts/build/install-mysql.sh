@@ -3,9 +3,11 @@
 ##  File:  install-mysql.sh
 ##  Desc:  Install MySQL Client
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 # Mysql setting up root password
 MYSQL_ROOT_PASSWORD=root

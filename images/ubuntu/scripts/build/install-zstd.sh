@@ -4,8 +4,10 @@
 ##  Desc:  Install zstd
 ##  Supply chain security: zstd - checksum validation
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Download zstd
 release_tag=$(curl -fsSL https://api.github.com/repos/facebook/zstd/releases/latest | jq -r '.tag_name')
@@ -21,8 +23,10 @@ use_checksum_comparison "$archive_path" "$external_hash"
 install_dpkgs liblz4-dev
 tar xzf "$archive_path" -C /tmp
 
-make -C "/tmp/${release_name}/contrib/pzstd" all >/dev/null |& tee -a install.errors
-make -C "/tmp/${release_name}" zstd-release >/dev/null |& tee -a install.errors
+# shellcheck disable=SC2046
+make -C "/tmp/${release_name}/contrib/pzstd" -j $(nproc) all
+# shellcheck disable=SC2046
+make -C "/tmp/${release_name}" -j $(nproc) zstd-release
 
 for copyprocess in zstd zstdless zstdgrep; do
     cp "/tmp/${release_name}/programs/${copyprocess}" /usr/local/bin/

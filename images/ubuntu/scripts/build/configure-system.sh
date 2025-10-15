@@ -3,8 +3,9 @@
 ##  File: configure-system.sh
 ##  Desc: Post deployment system configuration actions
 ################################################################################
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/os.sh
 
 mv -f "${IMAGE_FOLDER}/post-generation" /opt
 
@@ -13,7 +14,7 @@ chmod -R 777 /opt
 echo "chmod -R 777 /usr/share"
 chmod -R 777 /usr/share
 
-chmod 755 $IMAGE_FOLDER
+chmod 755 "$IMAGE_FOLDER"
 
 # Remove quotes around PATH
 ENVPATH=$(grep 'PATH=' /etc/environment | head -n 1 | sed -z 's/^PATH=*//')
@@ -22,12 +23,12 @@ ENVPATH=${ENVPATH%"\""}
 replace_etc_environment_variable "PATH" "${ENVPATH}"
 echo "Updated /etc/environment: $(cat /etc/environment)"
 
-# Clean yarn and npm cache if installed
-if command -v yarn > /dev/null; then
+# Clean yarn and npm cache
+if yarn --version > /dev/null; then
     yarn cache clean
 fi
 
-if command -v npm > /dev/null; then
+if npm --version; then
     npm cache clean --force
 fi
 

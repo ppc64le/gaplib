@@ -32,10 +32,10 @@ RUN     useradd -c 'Action Runner' -m -s /bin/bash runner && \
         echo 'runner ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/runner && \
         chmod 440 /etc/sudoers.d/runner
 
-RUN     mkdir -p /opt/runner && \
-        tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner && \
-        chown -R  runner:runner /opt/runner && \
-        su -c "/opt/runner/config.sh --version"  runner
+RUN     mkdir -p /opt/runner-cache && \
+        tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner-cache && \
+        chown -R  runner:runner /opt/runner-cache && \
+        su -c "/opt/runner-cache/config.sh --version"  runner
 
 RUN     dnf install -y -q cmake make automake autoconf m4 gcc gcc-c++ libtool epel-release
 

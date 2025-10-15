@@ -3,28 +3,35 @@
 ##  File:  install-java-tools.sh
 ##  Desc:  Install Java and related tooling (Ant, Gradle, Maven)
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
-source $HELPER_SCRIPTS/etc-environment.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+source "$HELPER_SCRIPTS"/etc-environment.sh
 
 create_java_environment_variable() {
     local java_version=$1
     local default=$2
 
-    if [ "$ARCH" = "ppc64le" ]; then
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
-        java_version_path="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
-    elif [ "$ARCH" = "s390x" ]; then
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-s390x"
-    else
-        local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-amd64"
-    fi
+    # Set architecture-specific variables using a case statement for clarity
+    case "$ARCH" in
+        "ppc64le")
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
+            java_version_path="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
+            ;;
+        "x86_64")
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-amd64"
+            ;;
+        "s390x" | *)
+            local install_path_pattern="/usr/lib/jvm/temurin-${java_version}-jdk-${ARCH}"
+            ;;
+    esac
 
     if [[ ${default} == "True" ]]; then
         echo "Setting up JAVA_HOME variable to ${install_path_pattern}"
         set_etc_environment_variable "JAVA_HOME" "${install_path_pattern}"
         echo "Setting up default symlink"
-        update-java-alternatives -s ${install_path_pattern}
+        update-java-alternatives -s "${install_path_pattern}"
     fi
 
     echo "Setting up JAVA_HOME_${java_version}_${ARCH} variable to ${install_path_pattern}"
@@ -35,7 +42,7 @@ install_open_jdk() {
     local java_version=$1
 
     # Install Java from PPA repositories.
-    install_dpkgs temurin-${java_version}-jdk=\*
+    install_dpkgs temurin-"${java_version}"-jdk=\*
 
     if [ "$ARCH" = "ppc64le" ]; then
         java_version_path="/usr/lib/jvm/temurin-${java_version}-jdk-ppc64el"
@@ -47,18 +54,19 @@ install_open_jdk() {
     
     java_toolcache_path="${AGENT_TOOLSDIRECTORY}/Java_Temurin-Hotspot_jdk"
 
+    # shellcheck disable=SC2002
     full_java_version=$(cat "${java_version_path}/release" | grep "^SEMANTIC" | cut -d "=" -f 2 | tr -d "\"" | tr "+" "-")
 
     # If there is no semver in java release, then extract java version from -fullversion
-    [[ -z ${full_java_version} ]] && full_java_version=$(${java_version_path}/bin/java -fullversion 2>&1 | tr -d "\"" | tr "+" "-" | awk '{print $4}')
+    [[ -z ${full_java_version} ]] && full_java_version=$("${java_version_path}"/bin/java -fullversion 2>&1 | tr -d "\"" | tr "+" "-" | awk '{print $4}')
 
     # Convert non valid semver like 11.0.14.1-9 -> 11.0.14-9
     # https://github.com/adoptium/temurin-build/issues/2248
-    [[ ${full_java_version} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]] && full_java_version=$(echo $full_java_version | sed -E 's/\.[0-9]+-/-/')
+    [[ ${full_java_version} =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ ]] && full_java_version=$(echo "$full_java_version" | sed -E 's/\.[0-9]+-/-/')
 
     # When version string is too short, add extra ".0" to make it valid semver
-    [[ ${full_java_version} =~ ^[0-9]+- ]] && full_java_version=$(echo $full_java_version | sed -E 's/-/.0-/')
-    [[ ${full_java_version} =~ ^[0-9]+\.[0-9]+- ]] && full_java_version=$(echo $full_java_version | sed -E 's/-/.0-/')
+    [[ ${full_java_version} =~ ^[0-9]+- ]] && full_java_version=$(echo "$full_java_version" | sed -E 's/-/.0-/')
+    [[ ${full_java_version} =~ ^[0-9]+\.[0-9]+- ]] && full_java_version=$(echo "$full_java_version" | sed -E 's/-/.0-/')
 
     java_toolcache_version_path="${java_toolcache_path}/${full_java_version}"
     echo "Java ${java_version} Toolcache Version Path: ${java_toolcache_version_path}"
@@ -68,7 +76,7 @@ install_open_jdk() {
     touch "${java_toolcache_version_path}/${ARCH}.complete"
 
     # Create symlink for Java
-    ln -s ${java_version_path} "${java_toolcache_version_path}/${ARCH}"
+    ln -s "${java_version_path}" "${java_toolcache_version_path}/${ARCH}"
 
     # add extra permissions to be able execute command without sudo
     chmod -R 777 /usr/lib/jvm
@@ -84,16 +92,19 @@ update_dpkgs
 
 # While Ubuntu 24.04 binaries are not released in the Adoptium repo, we will not install Java
 defaultVersion=$(get_toolset_value '.java.default')
+# shellcheck disable=SC2207
 jdkVersionsToInstall=($(get_toolset_value ".java.versions[]"))
 
+# shellcheck disable=SC2068
 for jdkVersionToInstall in ${jdkVersionsToInstall[@]}; do
-    install_open_jdk ${jdkVersionToInstall}
+    install_open_jdk "${jdkVersionToInstall}"
 
+    # shellcheck disable=SC2053
     if [[ ${jdkVersionToInstall} == ${defaultVersion} ]]
     then
-        create_java_environment_variable ${jdkVersionToInstall} True
+        create_java_environment_variable "${jdkVersionToInstall}" True
     else
-        create_java_environment_variable ${jdkVersionToInstall} False
+        create_java_environment_variable "${jdkVersionToInstall}" False
     fi
 done
 
@@ -106,14 +117,14 @@ mavenVersion=$(get_toolset_value '.java.maven')
 mavenDownloadUrl="https://dlcdn.apache.org/maven/maven-3/${mavenVersion}/binaries/apache-maven-${mavenVersion}-bin.zip"
 maven_archive_path=$(download_with_retry "$mavenDownloadUrl")
 unzip -qq -d /usr/share "$maven_archive_path"
-rm -f /usr/bin/mvn && ln -s /usr/share/apache-maven-${mavenVersion}/bin/mvn /usr/bin/mvn
+ln -s /usr/share/apache-maven-"${mavenVersion}"/bin/mvn /usr/bin/mvn
 
 # Install Gradle
 # This script founds the latest gradle release from https://services.gradle.org/versions/all
 # The release is downloaded, extracted, a symlink is created that points to it, and GRADLE_HOME is set.
 gradleJson=$(curl -fsSL https://services.gradle.org/versions/all)
-gradleLatestVersion=$(echo ${gradleJson} | jq -r '.[] | select(.version | contains("-") | not).version' | sort -V | tail -n1)
-gradleDownloadUrl=$(echo ${gradleJson} | jq -r ".[] | select(.version==\"$gradleLatestVersion\") | .downloadUrl")
+gradleLatestVersion=$(echo "${gradleJson}" | jq -r '.[] | select(.version | contains("-") | not).version' | sort -V | tail -n1)
+gradleDownloadUrl=$(echo "${gradleJson}" | jq -r ".[] | select(.version==\"$gradleLatestVersion\") | .downloadUrl")
 echo "gradleUrl=${gradleDownloadUrl}"
 echo "gradleVersion=${gradleLatestVersion}"
 gradle_archive_path=$(download_with_retry "$gradleDownloadUrl")

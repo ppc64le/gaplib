@@ -3,7 +3,7 @@
 set -euo pipefail 
 
 header() {
-    TS=`date +"%Y-%m-%dT%H:%M:%S%:z"`
+    TS=$(date +"%Y-%m-%dT%H:%M:%S%:z")
     echo "${TS} +--------------------------------------------+"
     echo "${TS} | $*"
     echo "${TS} +--------------------------------------------+"
@@ -11,7 +11,8 @@ header() {
 }
 
 msg() {
-    echo `date +"%Y-%m-%dT%H:%M:%S%:z"` $*
+    # shellcheck disable=SC2046
+    echo $(date +"%Y-%m-%dT%H:%M:%S%:z") "$*"
 }
 
 patch_runner() {
@@ -19,8 +20,9 @@ patch_runner() {
     cd /tmp
     git clone --tags -q "${RUNNERREPO}"
     cd runner
+    # shellcheck disable=SC2046
     git checkout $(git tag --sort=-v:refname | grep '^v[0-9]' | head -n1)
-    git apply --whitespace=nowarn ${IMAGE_FOLDER}/runner-sdk-8.patch
+    git apply --whitespace=nowarn "${IMAGE_FOLDER}"/runner-sdk-8.patch
     sed -i'' -e '/version/s/8......"$/8.0.100"/' src/global.json
 }
 
@@ -41,24 +43,24 @@ build_runner() {
 
 install_runner() {
     header "Installing runner"
-    sudo mkdir -p /opt/runner
-    sudo tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner
+    sudo mkdir -p /opt/runner-cache
+    sudo tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner-cache
 
     # Create runner user if not exists
     if ! id -u runner >/dev/null 2>&1; then
         sudo useradd -r -m -L -d /home/runner -s /bin/bash runner
     fi
 
-    sudo chown -R runner:runner /opt/runner
-    sudo -u runner /opt/runner/config.sh --version
+    sudo chown -R runner:runner /opt/runner-cache
+    sudo -u runner /opt/runner-cache/config.sh --version
 }
 
 pre_cleanup() {
-    sudo rm -rf /tmp/runner /opt/runner
+    sudo rm -rf /tmp/runner /opt/runner-cache
 }
 
 post_cleanup() {
-    sudo rm -rf ${IMAGE_FOLDER}/runner-sdk-8.patch \
+    sudo rm -rf "${IMAGE_FOLDER}"/runner-sdk-8.patch \
            /tmp/preseed-yaml /home/ubuntu/.nuget \
            /home/runner/.local/share
 }
@@ -71,7 +73,6 @@ run() {
     post_cleanup
 }
 
-ARCH=$(uname -m)
 RUNNERREPO="https://github.com/actions/runner"
 
 # Parse arguments
