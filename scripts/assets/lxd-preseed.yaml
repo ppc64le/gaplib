@@ -2,6 +2,7 @@ config: {}
 cluster: null
 networks:
 - config:
+    bridge.mtu: "1460"
     ipv4.address: auto
     ipv6.address: auto
   description: "gaplib network"
