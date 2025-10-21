@@ -4,11 +4,12 @@
 ##  Desc:  A temporary workaround for https://github.com/Azure/azure-linux-extensions/issues/1238.
 ##         Cleaned up during cleanup.sh.
 ################################################################################
+
 prefix=/usr/local/bin
 
 for real_tool in /usr/bin/apt /usr/bin/apt-get /usr/bin/apt-key; do
     tool=$(basename $real_tool)
-    cat >$prefix/$tool <<EOT
+    cat >$prefix/"$tool" <<EOT
 #!/bin/sh
 
 i=1
@@ -49,5 +50,5 @@ while [ \$i -le 30 ];do
   i=\$((i + 1))
 done
 EOT
-    chmod +x $prefix/$tool
+    chmod +x $prefix/"$tool"
 done

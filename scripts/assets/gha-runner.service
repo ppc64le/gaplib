@@ -4,9 +4,9 @@ After=network.target
 
 [Service]
 Environment=DOTNET_ROOT='/opt/dotnet'
-ExecStart=/usr/bin/bash -c "/opt/runner/run.sh"
+ExecStart=/usr/bin/bash -c "/opt/runner-cache/run.sh"
 User=ubuntu
-WorkingDirectory=/opt/runner
+WorkingDirectory=/opt/runner-cache
 KillMode=process
 KillSignal=SIGTERM
 TimeoutStopSec=5min

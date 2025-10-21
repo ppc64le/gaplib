@@ -3,9 +3,11 @@
 ##  File:  install-nginx.sh
 ##  Desc:  Install Nginx
 ################################################################################
+
 # Install Nginx
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 install_dpkgs nginx
 
 # Disable nginx.service

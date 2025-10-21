@@ -46,12 +46,14 @@ for project
 do
   url="https://api.github.com/repos/$project/releases/latest"
   feed="$(curl -L --silent --fail "$url")"
+  # shellcheck disable=SC2181
   if [ $? -ne 0 ]; then
     echo "Error fetching feed!" >&2
     continue
   fi
 
-  latest_release="$(echo $feed | jq .name | tr -d \")"
+  latest_release="$(echo "$feed" | jq .name | tr -d \")"
+  # shellcheck disable=SC2181
   if [ $? -ne 0 ]; then
     echo "Error parsing feed!" >&2
     continue
@@ -81,6 +83,7 @@ do
     echo "No new releases for $project"
     echo "Current release: $last_release_version"
     exit 1
+    # shellcheck disable=SC2317
     export BUILD_IMAGE=false
   fi
 done

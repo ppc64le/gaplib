@@ -3,7 +3,8 @@
 ##  File:  install-snap.sh
 ##  Desc:  Install snapd
 ################################################################################
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Install snapd if not already installed
 echo "Installing snapd..."
