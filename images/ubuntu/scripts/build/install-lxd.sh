@@ -18,9 +18,6 @@ fi
 echo "Installing LXD version ${LATEST_LTS_CHANNEL} using snap..."
 sudo snap install lxd --channel="${LATEST_LTS_CHANNEL}/stable"
 
-echo "Printing LXD info..."
-lxc info
-
 echo "Checking list of refreshable snaps..."
 sudo snap refresh --list
 

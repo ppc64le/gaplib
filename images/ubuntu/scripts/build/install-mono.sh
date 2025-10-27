@@ -3,9 +3,11 @@
 ##  File:  install-mono.sh
 ##  Desc:  Install Mono
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 os_label=$(lsb_release -cs)
 REPO_URL="https://download.mono-project.com/repo/ubuntu"
@@ -31,4 +33,4 @@ rm -f "${REPO_PATH}.save"
 rm $GPG_KEY
 
 # Document source repo
-echo "mono https://download.mono-project.com/repo/ubuntu stable-$os_label main" >> $HELPER_SCRIPTS/apt-sources.txt
+echo "mono https://download.mono-project.com/repo/ubuntu stable-$os_label main" >> "$HELPER_SCRIPTS"/apt-sources.txt

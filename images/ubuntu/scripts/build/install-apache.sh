@@ -3,8 +3,11 @@
 ##  File:  install-apache.sh
 ##  Desc:  Install Apache HTTP Server
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
+
 # Install Apache
 install_dpkgs apache2
 

@@ -3,7 +3,9 @@
 ##  File:  install-sbt.sh
 ##  Desc:  Install sbt
 ################################################################################
-source $HELPER_SCRIPTS/install.sh
+
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 
 # Install latest sbt release
 download_url=$(resolve_github_release_asset_url "sbt/sbt" "endswith(\".tgz\")" "latest")

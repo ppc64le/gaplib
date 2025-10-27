@@ -14,16 +14,7 @@ source "$HELPER_SCRIPTS"/os.sh
 source "$HELPER_SCRIPTS"/install.sh
 
 # Install Python, Python 3, pip, pip3
-install_dpkgs --no-install-recommends python3 python3-dev python3-pip python3-venv
-
-if is_ubuntu24; then
-# Create temporary workaround to allow user to continue using pip
-    # shellcheck disable=SC2024
-    sudo cat <<EOF > /etc/pip.conf
-[global]
-break-system-packages = true
-EOF
-fi
+install_dnfpkgs --no-install-recommends python3 python3-dev python3-pip python3-venv
 
 # Install pipx
 # Set pipx custom directory

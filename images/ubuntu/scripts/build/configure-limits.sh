@@ -3,12 +3,14 @@
 ##  File:  configure-limits.sh
 ##  Desc:  Configure limits
 ################################################################################
+
 echo 'session required pam_limits.so' >> /etc/pam.d/common-session
 echo 'session required pam_limits.so' >> /etc/pam.d/common-session-noninteractive
 echo 'DefaultLimitNOFILE=65536' >> /etc/systemd/system.conf
 echo 'DefaultLimitSTACK=16M:infinity' >> /etc/systemd/system.conf
 
 # Raise Number of File Descriptors
+# shellcheck disable=SC2129
 echo '* soft nofile 65536' >> /etc/security/limits.conf
 echo '* hard nofile 65536' >> /etc/security/limits.conf
 

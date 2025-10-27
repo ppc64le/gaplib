@@ -22,14 +22,14 @@ commit_files() {
 }
 
 push_files() {
-  git remote add https_push https://anup-kodlekere:${GH_TOKEN}@github.com/anup-kodlekere/gaplib.git > /dev/null 2>&1
-  git pull origin $TRAVIS_BRANCH --rebase
-  git push https_push HEAD:$TRAVIS_BRANCH
+  git remote add https_push https://anup-kodlekere:"${GH_TOKEN}"@github.com/anup-kodlekere/gaplib.git > /dev/null 2>&1
+  git pull origin "$TRAVIS_BRANCH" --rebase
+  git push https_push HEAD:"$TRAVIS_BRANCH"
 }
 
 update_last_version() {
   setup_git
-  commit_files $1
+  commit_files "$1"
   push_files
 }
 

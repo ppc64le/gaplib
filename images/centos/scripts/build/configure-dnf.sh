@@ -4,8 +4,10 @@
 ##  Desc:  Configure dnf/yum, install jq package, and improve package management behavior.
 ################################################################################
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/install.sh
 # Enable retries for DNF (maximum retries set to 10)
+# shellcheck disable=SC2129
 echo "retries=10" >> /etc/dnf/dnf.conf
 
 # Automatically assume 'yes' for prompts in DNF

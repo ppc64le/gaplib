@@ -3,14 +3,18 @@ set -e  # Exit on any error
 
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
-source ${HELPERS_DIR}/setup_vars.sh
-source ${HELPERS_DIR}/setup_img.sh
-source ${HELPERS_DIR}/run_script.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_vars.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/setup_img.sh
+# shellcheck disable=SC1091
+source "${HELPERS_DIR}"/run_script.sh
 
 BUILD_PREREQS_PATH="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
 msg() {
-    echo `date +"%Y-%m-%dT%H:%M:%S%:z"` $*
+    # shellcheck disable=SC2046
+    echo $(date +"%Y-%m-%dT%H:%M:%S%:z") "$*"
 }
 
 if [ ! -d "${BUILD_PREREQS_PATH}" ]; then
@@ -27,15 +31,15 @@ if [[ "$IMAGE_OS" == *"ubuntu"* ]]; then
 fi
 
 msg "Copy the register-runner.sh script into gha-builder"
-cp -r ${BUILD_PREREQS_PATH}/helpers/register-runner.sh "/opt/register-runner.sh"
+cp -r "${BUILD_PREREQS_PATH}"/helpers/register-runner.sh "/opt/register-runner.sh"
 chmod -R 0755 /opt/register-runner.sh
 
 msg "Copy the /etc/rc.local - required in case podman is used"
-cp -r ${BUILD_PREREQS_PATH}/assets/rc.local "/etc/rc.local"
+cp -r "${BUILD_PREREQS_PATH}"/assets/rc.local "/etc/rc.local"
 chmod -R 0755 /etc/rc.local
 
 msg "Copy the gha-service unit file into gha-builder"
-cp -r ${BUILD_PREREQS_PATH}/assets/gha-runner.service "/etc/systemd/system/gha-runner.service"
+cp -r "${BUILD_PREREQS_PATH}"/assets/gha-runner.service "/etc/systemd/system/gha-runner.service"
 chmod -R 0755 /etc/systemd/system/gha-runner.service
 
 sudo bash -c 'id -u runner >/dev/null 2>&1 || (useradd -c "Action Runner" -m runner && usermod -L runner && echo "runner  ALL=(ALL)       NOPASSWD: ALL" >/etc/sudoers.d/runner)'

@@ -3,23 +3,20 @@
 ##  File:  install-ruby.sh
 ##  Desc:  Install Ruby requirements and ruby gems
 ################################################################################
+
 # Source the helpers for use with the script
-source $HELPER_SCRIPTS/os.sh
-source $HELPER_SCRIPTS/install.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/os.sh
+source "$HELPER_SCRIPTS"/install.sh
 
 install_dpkgs ruby-full
-
-# temporary fix for fastlane installation https://github.com/sporkmonger/addressable/issues/541
-if is_ubuntu20; then
-    gem install public_suffix -v 5.1.1
-fi
 
 # Install ruby gems from toolset
 gems_to_install=$(get_toolset_value ".rubygems[] .name")
 if [[ -n "$gems_to_install" ]]; then
     for gem in $gems_to_install; do
         echo "Installing gem $gem"
-        gem install $gem
+        gem install --no-document "$gem"
     done
 fi
 
@@ -34,9 +31,10 @@ ruby_path="$AGENT_TOOLSDIRECTORY/Ruby"
 
 echo "Check if Ruby hostedtoolcache folder exist..."
 if [[ ! -d $ruby_path ]]; then
-    mkdir -p $ruby_path
+    mkdir -p "$ruby_path"
 fi
 
+# shellcheck disable=SC2068
 for toolset_version in ${toolset_versions[@]}; do
     download_url=$(resolve_github_release_asset_url "ruby/ruby-builder" "test(\"ruby-${toolset_version}-ubuntu-${platform_version}-${arch}.tar.gz\")" "${toolset_version}" "false" "true")
     package_tar_name="${download_url##*/}"
@@ -44,17 +42,17 @@ for toolset_version in ${toolset_versions[@]}; do
     ruby_version_path="$ruby_path/$ruby_version"
 
     echo "Create Ruby $ruby_version directory..."
-    mkdir -p $ruby_version_path
+    mkdir -p "$ruby_version_path"
 
     echo "Downloading tar archive $package_tar_name"
     package_archive_path=$(download_with_retry "$download_url")
 
     echo "Expand '$package_tar_name' to the '$ruby_version_path' folder"
-    tar xf "$package_archive_path" -C $ruby_version_path
+    tar xf "$package_archive_path" -C "$ruby_version_path"
 
-    complete_file_path="$ruby_version_path/$ARCH.complete"
+    complete_file_path="$ruby_version_path/x64.complete"
     if [[ ! -f $complete_file_path ]]; then
         echo "Create complete file"
-        touch $complete_file_path
+        touch "$complete_file_path"
     fi
 done

@@ -5,8 +5,9 @@
 ################################################################################
 
 # Source helper scripts
-source $HELPER_SCRIPTS/etc-environment.sh
-source $HELPER_SCRIPTS/os.sh
+# shellcheck disable=SC1091
+source "$HELPER_SCRIPTS"/etc-environment.sh
+source "$HELPER_SCRIPTS"/os.sh
 
 # Move post-generation files to /opt
 mv -f "${IMAGE_FOLDER}/post-generation" /opt
@@ -17,7 +18,7 @@ chmod -R 777 /opt
 echo "chmod -R 777 /usr/share"
 chmod -R 777 /usr/share
 
-chmod 755 $IMAGE_FOLDER
+chmod 755 "$IMAGE_FOLDER"
 
 # Remove quotes around PATH in /etc/environment
 ENVPATH=$(grep 'PATH=' /etc/environment | head -n 1 | sed -z 's/^PATH=*//')
