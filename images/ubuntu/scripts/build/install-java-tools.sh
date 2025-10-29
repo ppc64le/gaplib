@@ -86,7 +86,7 @@ update_dpkgs
 defaultVersion=$(get_toolset_value '.java.default')
 jdkVersionsToInstall=($(get_toolset_value ".java.versions[]"))
 
-for jdkVersionToInstall in ${jdkVersionsToInstall[@]}; do
+for jdkVersionToInstall in "${jdkVersionsToInstall[@]}"; do
     install_open_jdk ${jdkVersionToInstall}
 
     if [[ ${jdkVersionToInstall} == ${defaultVersion} ]]

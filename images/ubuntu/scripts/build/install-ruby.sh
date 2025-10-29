@@ -37,7 +37,7 @@ if [[ ! -d $ruby_path ]]; then
     mkdir -p $ruby_path
 fi
 
-for toolset_version in ${toolset_versions[@]}; do
+for toolset_version in "${toolset_versions[@]}"; do
     download_url=$(resolve_github_release_asset_url "ruby/ruby-builder" "test(\"ruby-${toolset_version}-ubuntu-${platform_version}-${arch}.tar.gz\")" "${toolset_version}" "false" "true")
     package_tar_name="${download_url##*/}"
     ruby_version=$(echo "$package_tar_name" | cut -d'-' -f 2)

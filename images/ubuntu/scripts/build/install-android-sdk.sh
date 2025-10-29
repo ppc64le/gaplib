@@ -22,7 +22,7 @@ else
         shift
         local tools_array=("$@")
 
-        for item in ${tools_array[@]}; do
+        for item in "${tools_array[@]}"; do
             # Take the last argument after splitting string by ';'' and '-''
             item_version=$(echo "${item##*[-;]}")
 
@@ -113,13 +113,13 @@ else
 
     available_platforms=($($SDKMANAGER --list | sed -n '/Available Packages:/,/^$/p' | grep "platforms;android-[0-9]" | cut -d"|" -f 1))
     all_build_tools=($($SDKMANAGER --list | grep "build-tools;" | cut -d"|" -f 1 | sort -u))
-    available_build_tools=$(echo ${all_build_tools[@]//*rc[0-9]/})
+    available_build_tools=$(echo "${all_build_tools[@]//*rc[0-9]/}")
 
     add_filtered_installation_components $minimum_platform_version "${available_platforms[@]}"
     add_filtered_installation_components $minimum_build_tool_version "${available_build_tools[@]}"
 
     # Install components
-    echo "y" | $SDKMANAGER ${components[@]}
+    echo "y" | $SDKMANAGER "${components[@]}"
 
     # Add required permissions
     chmod -R a+rwx ${ANDROID_SDK_ROOT}

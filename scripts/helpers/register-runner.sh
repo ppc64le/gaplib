@@ -10,7 +10,7 @@ do
     esac
 done
 
-while !(ping -q -c 1 -W 1 google.com >/dev/null)
+while ! (ping -q -c 1 -W 1 google.com >/dev/null)
 do
     echo "waiting for internet connectivity..."
     sleep 2

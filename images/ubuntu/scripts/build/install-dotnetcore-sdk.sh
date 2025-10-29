@@ -44,11 +44,11 @@ EOF
 
     update_dpkgs
 
-    for latest_package in ${latest_dotnet_packages[@]}; do
+    for latest_package in "${latest_dotnet_packages[@]}"; do
         echo "Determining if .NET Core ($latest_package) is installed"
-        if ! dpkg -S $latest_package &> /dev/null; then
+        if ! dpkg -S "$latest_package" &> /dev/null; then
             echo "Could not find .NET Core ($latest_package), installing..."
-            install_dpkgs $latest_package
+            install_dpkgs "$latest_package"
         else
             echo ".NET Core ($latest_package) is already installed"
         fi
@@ -61,7 +61,7 @@ EOF
     # Install .NET SDK from home repository
     # Get list of all released SDKs from channels which are not end-of-life or preview
     sdks=()
-    for version in ${dotnet_versions[@]}; do
+    for version in "${dotnet_versions[@]}"; do
         release_url="https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/${version}/releases.json"
         releases=$(cat "$(download_with_retry "$release_url")")
         if [[ $version == "6.0" ]]; then
@@ -72,7 +72,7 @@ EOF
         fi
     done
 
-    sorted_sdks=$(echo ${sdks[@]} | tr ' ' '\n' | sort -r | uniq -w 5)
+    sorted_sdks=$(echo "${sdks[@]}" | tr ' ' '\n' | sort -r | uniq -w 5)
 
     # Download/install additional SDKs in parallel
     export -f download_with_retry
@@ -92,8 +92,8 @@ EOF
     prepend_etc_environment_path '$HOME/.dotnet/tools'
 
     # Install .Net tools
-    for dotnet_tool in ${dotnet_tools[@]}; do
+    for dotnet_tool in "${dotnet_tools[@]}"; do
         echo "Installing dotnet tool $dotnet_tool"
-        dotnet tool install $dotnet_tool --tool-path '/etc/skel/.dotnet/tools'
+        dotnet tool install "$dotnet_tool" --tool-path '/etc/skel/.dotnet/tools'
     done
 fi

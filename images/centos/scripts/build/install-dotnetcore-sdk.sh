@@ -49,7 +49,7 @@ EOF
     update_dnfpkgs
 
     # Install .NET SDK RPM packages
-    for latest_package in ${latest_dotnet_packages[@]}; do
+    for latest_package in "${latest_dotnet_packages[@]}"; do
         echo "Determining if .NET Core ($latest_package) is installed"
         if ! rpm -q $latest_package &> /dev/null; then
             echo "Could not find .NET Core ($latest_package), installing..."
@@ -65,7 +65,7 @@ EOF
 
     # Install .NET SDK from home repository
     sdks=()
-    for version in ${dotnet_versions[@]}; do
+    for version in "${dotnet_versions[@]}"; do
         release_url="https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/${version}/releases.json"
         releases=$(cat "$(download_with_retry "$release_url")")
         if [[ $version == "6.0" ]]; then
@@ -76,7 +76,7 @@ EOF
         fi
     done
 
-    sorted_sdks=$(echo ${sdks[@]} | tr ' ' '\n' | sort -r | uniq -w 5)
+    sorted_sdks=$(echo "${sdks[@]}" | tr ' ' '\n' | sort -r | uniq -w 5)
 
     export -f download_with_retry
     export -f extract_dotnet_sdk
@@ -94,7 +94,7 @@ EOF
     echo 'PATH="$HOME/.dotnet/tools:$PATH"' | sudo tee -a /etc/environment
 
     # Install .NET tools
-    for dotnet_tool in ${dotnet_tools[@]}; do
+    for dotnet_tool in "${dotnet_tools[@]}"; do
         echo "Installing dotnet tool $dotnet_tool"
         dotnet tool install $dotnet_tool --tool-path '/etc/skel/.dotnet/tools'
     done

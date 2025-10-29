@@ -32,4 +32,4 @@ jobs:
           echo "Running ShellCheck on found scripts..."
 
           # TODO: Currently printing only 'warnings' and 'errors'. Work on refining the scans.
-          shellcheck --severity=warning --severity=error --format=gcc $(cat script_list.txt)
+          shellcheck --severity=warning --format=gcc $(cat script_list.txt)
