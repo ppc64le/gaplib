@@ -3,7 +3,7 @@
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
 usage() {
-    echo "lxd.sh [flags]"
+    echo "Usage: $0 [flags]"
     echo ""
     echo "Where flags:"
     echo "--export-image               Publish and Export the built image on completion of build"
@@ -195,31 +195,41 @@ build_image() {
   # We use `flock` to create a lock file. Only one script instance can hold the lock
   # at a time, forcing other instances to wait here. This prevents race conditions
   
-  local LXD_PUBLISH_LOCK="/var/lock/lxd-publish.lock"
-  exec 200>"${LXD_PUBLISH_LOCK}" # Open a file descriptor for the lock file
-  msg "Attempting to acquire lock for image publication... (${LXD_PUBLISH_LOCK})"
-  flock 200 # This command will wait until it can acquire an exclusive lock on FD 200
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    local LXD_PUBLISH_LOCK="/var/lock/lxd-publish.lock"
+    exec 200>"${LXD_PUBLISH_LOCK}" # Open a file descriptor for the lock file
+    msg "Image export requested. Attempting to acquire lock for image publication... (${LXD_PUBLISH_LOCK})"
+    flock 200 # This command will wait until it can acquire an exclusive lock on FD 200
 
-  msg "Lock acquired. Proceeding with atomic image publication."
+    msg "Lock acquired. Proceeding with atomic image publication."
+  else 
+    msg "Image export skipped, hence not acquiring lock..."
+  fi
 
-  msg "Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
-  if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
-    FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
-    if [ -n "${FINGERPRINT}" ]; then
-        msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
-        lxc image delete "${FINGERPRINT}"
-        msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
+  
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    msg "Image export requested. Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
+    if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
+      FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
+      if [ -n "${FINGERPRINT}" ]; then
+          msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
+          lxc image delete "${FINGERPRINT}"
+          msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
+      else
+          msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
+          exit 1
+      fi
     else
-        msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
-        exit 1
+      msg "No existing image/alias named ${IMAGE_ALIAS} found."
     fi
-  else
-    msg "No existing image/alias named ${IMAGE_ALIAS} found."
+  else 
+    msg "Image export skipped, hence keeping the existing image if any"
   fi
 
   msg "Runner build complete."
 
   if [[ "${EXPORT_IMAGE}" == true ]]; then
+    msg "Image export flag is set, proceeding with image publish and export..."
     lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
 
     msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
