@@ -2,24 +2,56 @@
 
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
+usage() {
+    echo "lxd.sh [flags]"
+    echo ""
+    echo "Where flags:"
+    echo "--export-image               Publish and Export the built image on completion of build"
+    echo "                             defaults to false"
+    echo "-h, --help                   Display this usage information"
+    exit 1
+}
+
+parse_args() {
+    EXPORT_IMAGE=false
+    POSITIONAL_ARGS=()
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --export-image)
+                EXPORT_IMAGE=true
+                ;;
+            -h|--help)
+                usage
+                ;;
+            --*)
+                echo "Unknown option: $1" >&2
+                usage
+                ;;
+            *)
+                POSITIONAL_ARGS+=("$1")  # anything not starting with -- is positional
+                ;;
+        esac
+        shift
+    done
+
+    # Rebuild positional arguments
+    set -- "${POSITIONAL_ARGS[@]}"
+
+    # Export flags for rest of the script
+    export EXPORT_IMAGE
+}
+
+# Parse optional arguments before passing positional args over
+parse_args "$@"
+set -- "${POSITIONAL_ARGS[@]}"
+
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/setup_vars.sh
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/setup_img.sh
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/run_script.sh
-
-usage() {
-    echo "setup-build-env [flags]"
-    echo ""
-    echo "Where flags:"
-    echo "-a <action runner git repo>  Where to find the action runner git repo"
-    echo "                             defaults to ${ACTION_RUNNER}"
-    echo "-o <exported image>          Path to exported image"
-    echo "                             defaults to ${EXPORT}"
-    echo "-h                           Display this usage information"
-    exit
-}
 
 msg() {
     # shellcheck disable=SC2046
@@ -185,28 +217,33 @@ build_image() {
     msg "No existing image/alias named ${IMAGE_ALIAS} found."
   fi
 
-  msg "Runner build complete. Creating image snapshot."
-  lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
+  msg "Runner build complete."
 
-  msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
-  lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
-    --compression none \
-    description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
-    properties.build.commit="${BUILD_SHA}" \
-    properties.build.date="${BUILD_DATE}"
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
 
-  msg "Image publication complete. Releasing lock."
-  # The lock on FD 200 is automatically released when the script or function exits.
-  # ---------------------- CRITICAL SECTION END ----------------------
+    msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
+    lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
+      --compression none \
+      description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
+      properties.build.commit="${BUILD_SHA}" \
+      properties.build.date="${BUILD_DATE}"
 
-  msg "Export the image to ${EXPORT} for use elsewhere"
-  lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
+    msg "Image publication complete. Releasing lock."
+    # The lock on FD 200 is automatically released when the script or function exits.
+    # ---------------------- CRITICAL SECTION END ----------------------
 
-  local PRIMER_CONTAINER
-  PRIMER_CONTAINER="primer-$(date +%s)"
-  msg "Priming the filesystem by launching the newly built container"
-  lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
-  lxc rm -f "${PRIMER_CONTAINER}"
+    msg "Export the image to ${EXPORT} for use elsewhere"
+    lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
+
+    local PRIMER_CONTAINER
+    PRIMER_CONTAINER="primer-$(date +%s)"
+    msg "Priming the filesystem by launching the newly built container"
+    lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
+    lxc rm -f "${PRIMER_CONTAINER}"
+  else
+    msg "Export flag not set. Skipping publish and export"
+  fi 
 
   # Before exiting successfully, clear the trap so it doesn't run again on the main script's exit.
   trap - INT TERM EXIT
@@ -238,24 +275,6 @@ prolog() {
 }
 
 prolog
-while getopts "a:o:h:" opt
-do
-    case "${opt}" in
-        a)
-            ACTION_RUNNER=${OPTARG}
-            ;;
-        o)
-            EXPORT=${OPTARG}
-            ;;
-        h)
-            usage
-            ;;
-        *)
-            usage
-            ;;
-    esac
-done
-shift $(( OPTIND - 1 ))
 run "$@"
 RC=$?
 exit ${RC}
