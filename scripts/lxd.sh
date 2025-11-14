@@ -2,24 +2,56 @@
 
 HELPERS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/helpers"
 
+usage() {
+    echo "Usage: $0 [flags]"
+    echo ""
+    echo "Where flags:"
+    echo "--export-image               Publish and Export the built image on completion of build"
+    echo "                             defaults to false"
+    echo "-h, --help                   Display this usage information"
+    exit 1
+}
+
+parse_args() {
+    EXPORT_IMAGE=false
+    POSITIONAL_ARGS=()
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --export-image)
+                EXPORT_IMAGE=true
+                ;;
+            -h|--help)
+                usage
+                ;;
+            --*)
+                echo "Unknown option: $1" >&2
+                usage
+                ;;
+            *)
+                POSITIONAL_ARGS+=("$1")  # anything not starting with -- is positional
+                ;;
+        esac
+        shift
+    done
+
+    # Rebuild positional arguments
+    set -- "${POSITIONAL_ARGS[@]}"
+
+    # Export flags for rest of the script
+    export EXPORT_IMAGE
+}
+
+# Parse optional arguments before passing positional args over
+parse_args "$@"
+set -- "${POSITIONAL_ARGS[@]}"
+
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/setup_vars.sh
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/setup_img.sh
 # shellcheck disable=SC1091
 source "${HELPERS_DIR}"/run_script.sh
-
-usage() {
-    echo "setup-build-env [flags]"
-    echo ""
-    echo "Where flags:"
-    echo "-a <action runner git repo>  Where to find the action runner git repo"
-    echo "                             defaults to ${ACTION_RUNNER}"
-    echo "-o <exported image>          Path to exported image"
-    echo "                             defaults to ${EXPORT}"
-    echo "-h                           Display this usage information"
-    exit
-}
 
 msg() {
     # shellcheck disable=SC2046
@@ -163,50 +195,65 @@ build_image() {
   # We use `flock` to create a lock file. Only one script instance can hold the lock
   # at a time, forcing other instances to wait here. This prevents race conditions
   
-  local LXD_PUBLISH_LOCK="/var/lock/lxd-publish.lock"
-  exec 200>"${LXD_PUBLISH_LOCK}" # Open a file descriptor for the lock file
-  msg "Attempting to acquire lock for image publication... (${LXD_PUBLISH_LOCK})"
-  flock 200 # This command will wait until it can acquire an exclusive lock on FD 200
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    local LXD_PUBLISH_LOCK="/var/lock/lxd-publish.lock"
+    exec 200>"${LXD_PUBLISH_LOCK}" # Open a file descriptor for the lock file
+    msg "Image export requested. Attempting to acquire lock for image publication... (${LXD_PUBLISH_LOCK})"
+    flock 200 # This command will wait until it can acquire an exclusive lock on FD 200
 
-  msg "Lock acquired. Proceeding with atomic image publication."
-
-  msg "Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
-  if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
-    FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
-    if [ -n "${FINGERPRINT}" ]; then
-        msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
-        lxc image delete "${FINGERPRINT}"
-        msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
-    else
-        msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
-        exit 1
-    fi
-  else
-    msg "No existing image/alias named ${IMAGE_ALIAS} found."
+    msg "Lock acquired. Proceeding with atomic image publication."
+  else 
+    msg "Image export skipped, hence not acquiring lock..."
   fi
 
-  msg "Runner build complete. Creating image snapshot."
-  lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
+  
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    msg "Image export requested. Deleting old image (by fingerprint from alias ${IMAGE_ALIAS})"
+    if lxc image info "${IMAGE_ALIAS}" >/dev/null 2>&1; then
+      FINGERPRINT=$(lxc image info "${IMAGE_ALIAS}" | awk '/^Fingerprint:/ {print $2; exit}')
+      if [ -n "${FINGERPRINT}" ]; then
+          msg "Found fingerprint ${FINGERPRINT} for alias ${IMAGE_ALIAS}. Deleting image ${FINGERPRINT}..."
+          lxc image delete "${FINGERPRINT}"
+          msg "Image (fingerprint ${FINGERPRINT}) deleted successfully."
+      else
+          msg "Could not determine fingerprint for alias ${IMAGE_ALIAS}." >&2
+          exit 1
+      fi
+    else
+      msg "No existing image/alias named ${IMAGE_ALIAS} found."
+    fi
+  else 
+    msg "Image export skipped, hence retaining the existing image if any"
+  fi
 
-  msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
-  lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
-    --compression none \
-    description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
-    properties.build.commit="${BUILD_SHA}" \
-    properties.build.date="${BUILD_DATE}"
+  msg "Runner build complete."
 
-  msg "Image publication complete. Releasing lock."
-  # The lock on FD 200 is automatically released when the script or function exits.
-  # ---------------------- CRITICAL SECTION END ----------------------
+  if [[ "${EXPORT_IMAGE}" == true ]]; then
+    msg "Image export flag is set, proceeding with image publish and export..."
+    lxc snapshot "${BUILD_CONTAINER}" "build-snapshot"
 
-  msg "Export the image to ${EXPORT} for use elsewhere"
-  lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
+    msg "Publishing snapshot as new image: ${IMAGE_ALIAS}"
+    lxc publish "${BUILD_CONTAINER}/build-snapshot" -f --alias "${IMAGE_ALIAS}" \
+      --compression none \
+      description="GitHub Actions ${IMAGE_OS} ${IMAGE_VERSION} Runner for ${ARCH}" \
+      properties.build.commit="${BUILD_SHA}" \
+      properties.build.date="${BUILD_DATE}"
 
-  local PRIMER_CONTAINER
-  PRIMER_CONTAINER="primer-$(date +%s)"
-  msg "Priming the filesystem by launching the newly built container"
-  lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
-  lxc rm -f "${PRIMER_CONTAINER}"
+    msg "Image publication complete. Releasing lock."
+    # The lock on FD 200 is automatically released when the script or function exits.
+    # ---------------------- CRITICAL SECTION END ----------------------
+
+    msg "Export the image to ${EXPORT} for use elsewhere"
+    lxc image export "${IMAGE_ALIAS}" "${EXPORT}/${IMAGE_OS}-${IMAGE_VERSION}-${ARCH}${WORKER_TYPE}${WORKER_CPU}"
+
+    local PRIMER_CONTAINER
+    PRIMER_CONTAINER="primer-$(date +%s)"
+    msg "Priming the filesystem by launching the newly built container"
+    lxc launch "${IMAGE_ALIAS}" "${PRIMER_CONTAINER}"
+    lxc rm -f "${PRIMER_CONTAINER}"
+  else
+    msg "Export flag not set. Skipping publish and export"
+  fi 
 
   # Before exiting successfully, clear the trap so it doesn't run again on the main script's exit.
   trap - INT TERM EXIT
@@ -238,24 +285,6 @@ prolog() {
 }
 
 prolog
-while getopts "a:o:h:" opt
-do
-    case "${opt}" in
-        a)
-            ACTION_RUNNER=${OPTARG}
-            ;;
-        o)
-            EXPORT=${OPTARG}
-            ;;
-        h)
-            usage
-            ;;
-        *)
-            usage
-            ;;
-    esac
-done
-shift $(( OPTIND - 1 ))
 run "$@"
 RC=$?
 exit ${RC}
