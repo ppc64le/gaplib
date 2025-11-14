@@ -40,7 +40,14 @@ run_setup() {
 
     # The script to be run inside the new shell.
     # It sources the target script and passes along all of its own arguments ("$@").
-    local inner_script=". 'scripts/${env}.sh' \"\$@\""
+    local inner_script=""
+    if (( ${#NAMED_ARGS[@]} > 0 )) && [[ "$env" == "lxd" ]]; then
+        echo "Detected named arguments: ${NAMED_ARGS[*]}"
+        echo "Passing named args to LXD script."
+        inner_script=". 'scripts/${env}.sh' \"\${NAMED_ARGS[@]}\" \"\$@\""
+    else
+        inner_script=". 'scripts/${env}.sh' \"\$@\""
+    fi
 
     # Execute using sudo bash -c.
     # The first argument after the script string ('bash') becomes $0 inside the new shell.
@@ -118,8 +125,15 @@ get_lxd_args() {
     if grep -q -E 'cpu\s+:\s+POWER10' /proc/cpuinfo 2>/dev/null; then
         arch_arg="-p10"
     fi
+
+    local export_img_choice
+    export_img_choice=$(select_menu "Choose whether to export final image: " "yes" "no")
+    case "$export_img_choice" in 
+        "yes") NAMED_ARGS+=("--export-image");;
+        "no") ;;
+    esac
     
-    echo "$worker_arg $arch_arg"
+    LXD_ARGS=("$worker_arg" "$arch_arg")
 }
 
 
@@ -196,8 +210,8 @@ main() {
         
         # Get extra args only if the environment is LXD
         if [[ "$env" == "lxd" ]]; then
-            lxd_args=$(get_lxd_args)
-            read -r worker_arg arch_arg <<< "$lxd_args"
+            get_lxd_args
+            read -r worker_arg arch_arg <<< "${LXD_ARGS[*]}"
         fi
 
         # Run the final setup
@@ -215,5 +229,7 @@ main() {
     done
 }
 
+# Declare global array to hold and parse named args
+NAMED_ARGS=()
 # Run the main function
 main

@@ -223,7 +223,7 @@ build_image() {
       msg "No existing image/alias named ${IMAGE_ALIAS} found."
     fi
   else 
-    msg "Image export skipped, hence keeping the existing image if any"
+    msg "Image export skipped, hence retaining the existing image if any"
   fi
 
   msg "Runner build complete."
