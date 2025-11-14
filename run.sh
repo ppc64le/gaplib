@@ -44,7 +44,7 @@ run_setup() {
     if (( ${#NAMED_ARGS[@]} > 0 )) && [[ "$env" == "lxd" ]]; then
         echo "Detected named arguments: ${NAMED_ARGS[*]}"
         echo "Passing named args to LXD script."
-        inner_script=". 'scripts/${env}.sh' \"\${NAMED_ARGS[@]}\" \"\$@\""
+        inner_script=". 'scripts/${env}.sh' ${NAMED_ARGS[@]:+${NAMED_ARGS[@]}} \"\$@\""
     else
         inner_script=". 'scripts/${env}.sh' \"\$@\""
     fi
