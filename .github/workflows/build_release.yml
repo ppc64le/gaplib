@@ -48,5 +48,5 @@ jobs:
     - name: Installing runner
       run: |
         mkdir -p /opt/runner-cache
-        tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner-cache
+        sudo tar -xf /tmp/runner/_package/*.tar.gz -C /opt/runner-cache
         /opt/runner-cache/config.sh --version
