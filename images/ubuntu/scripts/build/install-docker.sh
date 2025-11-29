@@ -61,6 +61,46 @@ done
 gid=$(cut -d ":" -f 3 /etc/group | grep "^1..$" | sort -n | tail -n 1 | awk '{ print $1+1 }')
 groupmod -g "$gid" docker
 
+[ -f /usr/share/bash-completion/completions/docker ] && \
+    cp -f /usr/share/bash-completion/completions/docker /etc/bash_completion.d/
+
+[ ! -d /etc/docker ] && mkdir /etc/docker
+cat << EOF > /etc/docker/daemon.json
+{
+    "mtu": 1460,
+    "default-network-opts": {
+        "bridge": {
+            "com.docker.network.driver.mtu": "1460"
+        }
+    },
+    "data-root": "/var/lib/docker",
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "360m",
+        "max-file": "4"
+    },
+    "default-ulimits": {
+        "nofile": {
+            "Name": "nofile",
+            "Hard": 65536,
+            "Soft": 65536
+        },
+        "nproc": {
+            "Name": "nproc",
+            "Hard": 65536,
+            "Soft": 65536
+        }
+    },
+    "live-restore": true,
+    "max-concurrent-downloads": 10,
+    "max-concurrent-uploads": 10,
+    "storage-driver": "overlay2",
+    "exec-opts": [
+        "native.cgroupdriver=systemd"
+    ]
+}
+EOF
+
 # Create systemd-tmpfiles configuration for Docker
 cat <<EOF | sudo tee /etc/tmpfiles.d/docker.conf
 L /run/docker.sock - - - - root docker 0770
