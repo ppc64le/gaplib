@@ -35,4 +35,4 @@ jobs:
       - name: Build GAPLIB Image
         run: | 
           sed -i -E '/install-snap\.sh|install-lxd\.sh|configure-snap\.sh/d' scripts/helpers/setup_install.sh
-          scripts/lxd.sh "${{ matrix.os }}" "${{ matrix.version }}" "" "" "${{ matrix.setup_type }}"
+          scripts/lxd.sh "${{ matrix.os }}" "${{ matrix.version }}" "" "" "${{ matrix.setup_type }}" --skip-lxd-snapshot

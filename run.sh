@@ -3,6 +3,39 @@ set -euo pipefail
 
 # --- Reusable Helper Functions ---
 
+# Function to display help message
+show_help() {
+    cat << EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Description:
+  This is an interactive wrapper script designed to facilitate the setup of 
+  various environments including VM (Host), LXD, Docker, and Podman.
+  
+  It guides the user through a menu-driven process to select:
+  1. Target Environment (VM, LXD, Docker, Podman)
+  2. Operating System & Version
+  3. Setup Type (Minimal vs Complete)
+  4. Infrastructure specific arguments (Worker size, Architecture)
+
+Options:
+  -h, --help    Show this help message and exit.
+
+-------------------------------------------------------------------------
+IMPORTANT NOTE ON SUBSCRIPTS:
+  This script acts as a runner. It delegates the actual configuration logic 
+  to specific scripts located in the 'scripts/' directory (e.g., scripts/lxd.sh).
+
+  If you need detailed information about specific parameters, flags, or 
+  underlying logic for a specific environment, please run the help command 
+  on that subscript directly.
+
+  Examples:
+    scripts/lxd.sh --help
+-------------------------------------------------------------------------
+EOF
+}
+
 # A generic function to display a menu and get user's choice.
 # Arguments:
 #   $1: The prompt to display to the user.
@@ -40,14 +73,7 @@ run_setup() {
 
     # The script to be run inside the new shell.
     # It sources the target script and passes along all of its own arguments ("$@").
-    local inner_script=""
-    if (( ${#NAMED_ARGS[@]} > 0 )) && [[ "$env" == "lxd" ]]; then
-        echo "Detected named arguments: ${NAMED_ARGS[*]}"
-        echo "Passing named args to LXD script."
-        inner_script=". 'scripts/${env}.sh' ${NAMED_ARGS[@]:+${NAMED_ARGS[@]}} \"\$@\""
-    else
-        inner_script=". 'scripts/${env}.sh' \"\$@\""
-    fi
+    local inner_script=". 'scripts/${env}.sh' \"\$@\""
 
     # Execute using sudo bash -c.
     # The first argument after the script string ('bash') becomes $0 inside the new shell.
@@ -125,15 +151,8 @@ get_lxd_args() {
     if grep -q -E 'cpu\s+:\s+POWER10' /proc/cpuinfo 2>/dev/null; then
         arch_arg="-p10"
     fi
-
-    local export_img_choice
-    export_img_choice=$(select_menu "Choose whether to export final image: " "yes" "no")
-    case "$export_img_choice" in 
-        "yes") NAMED_ARGS+=("--export-image");;
-        "no") ;;
-    esac
     
-    LXD_ARGS=("$worker_arg" "$arch_arg")
+    echo "$worker_arg $arch_arg"
 }
 
 
@@ -210,8 +229,8 @@ main() {
         
         # Get extra args only if the environment is LXD
         if [[ "$env" == "lxd" ]]; then
-            get_lxd_args
-            read -r worker_arg arch_arg <<< "${LXD_ARGS[*]}"
+            lxd_args=$(get_lxd_args)
+            read -r worker_arg arch_arg <<< "$lxd_args"
         fi
 
         # Run the final setup
@@ -229,7 +248,13 @@ main() {
     done
 }
 
-# Declare global array to hold and parse named args
-NAMED_ARGS=()
+# --- Argument Parsing ---
+
+# Check if help is requested before starting main execution
+if [[ "${1:-}" == "-h" ]] || [[ "${1:-}" == "--help" ]]; then
+    show_help
+    exit 0
+fi
+
 # Run the main function
 main
