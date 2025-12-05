@@ -60,8 +60,6 @@ if [ "$SETUP" == "minimal" ]; then
         "install-git-lfs.sh"
         "install-github-cli.sh"
         "install-python.sh"
-        "install-snap.sh"
-        "install-lxd.sh"
         "install-zstd.sh"
     )
 elif [ "$SETUP" == "complete" ]; then
@@ -115,8 +113,6 @@ elif [ "$SETUP" == "complete" ]; then
             "install-android-sdk.sh"
             "install-pypy.sh"
             "install-python.sh"
-            "install-snap.sh"
-            "install-lxd.sh"
             "install-zstd.sh"
             "install-ninja.sh"
         )
@@ -180,8 +176,6 @@ elif [ "$SETUP" == "complete" ]; then
             "install-android-sdk.sh"
             "install-pypy.sh"
             "install-python.sh"
-            "install-snap.sh"
-            "install-lxd.sh"
             "install-zstd.sh"
             "install-ninja.sh"
         )
@@ -200,13 +194,18 @@ for SCRIPT_FILE in "${SCRIPT_FILES[@]}"; do
     run_script "$SCRIPT_PATH" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
 done
 
+# Install and configure snap and lxd unless skipped
+if [ "${SKIP_SNAP_LXD:-false}" != "true" ]; then
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-snap.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/install-lxd.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH" "IMAGE_FOLDER"
+    run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
+fi
+
 run_script "${INSTALLER_SCRIPT_FOLDER}/install-docker.sh" "DOCKERHUB_PULL_IMAGES" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
     
 run_script "${INSTALLER_SCRIPT_FOLDER}/install-pipx-packages.sh" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
 
 run_script "${INSTALLER_SCRIPT_FOLDER}/install-homebrew.sh" "DEBIAN_FRONTEND" "HELPER_SCRIPTS" "INSTALLER_SCRIPT_FOLDER" "ARCH"
-
-run_script "${INSTALLER_SCRIPT_FOLDER}/configure-snap.sh" "HELPER_SCRIPTS" "ARCH"
 
 # echo 'Rebooting VM...'
 # sudo reboot

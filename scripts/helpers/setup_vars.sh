@@ -13,6 +13,7 @@ usage() {
     echo "  5. SETUP_TYPE    (Optional, default: minimal)"
     echo ""
     echo "Flags:"
+    echo "  --skip-snap-lxd         Skip snap and lxd installation and configuration"
     echo "  --skip-lxd-img-export   Skip LXD image export"
     echo "  --skip-lxd-img-primer   Skip LXD image primer"
     echo "  --skip-lxd-publish      Skip LXD publish"
@@ -24,6 +25,7 @@ usage() {
 }
 
 # Initialize Defaults ---
+SKIP_SNAP_LXD=false
 SKIP_LXD_IMG_EXPORT=false
 SKIP_LXD_IMG_PRIMER=false
 SKIP_LXD_PUBLISH=false
@@ -38,6 +40,10 @@ clean_args=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --skip-snap-lxd)
+            # shellcheck disable=SC2034
+            SKIP_SNAP_LXD=true
+            ;;
         --skip-lxd-img-export)
             # shellcheck disable=SC2034
             SKIP_LXD_IMG_EXPORT=true
