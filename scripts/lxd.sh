@@ -151,7 +151,7 @@ build_image() {
   # shellcheck disable=SC1073
   # shellcheck disable=SC2154
   if ! lxc exec "${BUILD_CONTAINER}" --user 0 --group 0 -- \
-    bash -c 'exec "$@"' _ "${helper_script_folder}/setup_install.sh" "${IMAGE_OS}" "${IMAGE_VERSION}" "${WORKER_TYPE}" "${WORKER_CPU}" "${SETUP}"; then
+    bash -c 'exec "$@"' _ "${helper_script_folder}/setup_install.sh" "${clean_args[@]}" "${forward_args[@]}"; then
 
     msg "!!! The installation script inside the container failed. Triggering cleanup. !!!" >&2
     return 1 # Exit with an error code to trigger the trap and signal failure

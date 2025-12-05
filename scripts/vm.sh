@@ -42,7 +42,8 @@ msg "Copy the gha-service unit file into gha-builder"
 cp -r "${BUILD_PREREQS_PATH}"/assets/gha-runner.service "/etc/systemd/system/gha-runner.service"
 chmod -R 0755 /etc/systemd/system/gha-runner.service
 
-sudo bash -c 'exec "$@"' _ "${HELPER_SCRIPTS}/setup_install.sh" "${IMAGE_OS}" "${IMAGE_VERSION}" "${WORKER_TYPE}" "${WORKER_CPU}" "${SETUP}"
+# shellcheck disable=SC2154
+sudo bash -c 'exec "$@"' _ "${HELPER_SCRIPTS}/setup_install.sh" "${clean_args[@]}" "${forward_args[@]}"
 
 sudo bash -c 'id -u runner >/dev/null 2>&1 || (useradd -c "Action Runner" -m -s /bin/bash runner && usermod -L runner && echo "runner ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/runner && chmod 440 /etc/sudoers.d/runner)'
 

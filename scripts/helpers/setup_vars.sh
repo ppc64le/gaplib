@@ -14,6 +14,7 @@ usage() {
     echo ""
     echo "Flags:"
     echo "  --lxd-debug             Enable LXD debug mode (non-ephemeral containers)"
+    echo "  --skip-snap-lxd         Skip snap and lxd installation and configuration"
     echo "  --skip-lxd-img-export   Skip LXD image export"
     echo "  --skip-lxd-img-primer   Skip LXD image primer"
     echo "  --skip-lxd-publish      Skip LXD publish"
@@ -26,6 +27,7 @@ usage() {
 
 # Initialize Defaults ---
 LXD_DEBUG=false
+SKIP_SNAP_LXD=false
 SKIP_LXD_IMG_EXPORT=false
 SKIP_LXD_IMG_PRIMER=false
 SKIP_LXD_PUBLISH=false
@@ -37,28 +39,39 @@ PATCH_FILE="${PATCH_FILE:-runner-sdk8-${ARCH}.patch}"
 # We use a temporary array to store non-flag arguments to avoid clobbering 
 # the parent shell's positional parameters with 'set --'.
 clean_args=()
+forward_args=() 
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --lxd-debug)
             # shellcheck disable=SC2034
             LXD_DEBUG=true
+            forward_args+=("$1")
+            ;;
+        --skip-snap-lxd)
+            # shellcheck disable=SC2034
+            SKIP_SNAP_LXD=true
+            forward_args+=("$1")
             ;;
         --skip-lxd-img-export)
             # shellcheck disable=SC2034
             SKIP_LXD_IMG_EXPORT=true
+            forward_args+=("$1")
             ;;
         --skip-lxd-img-primer)
             # shellcheck disable=SC2034
             SKIP_LXD_IMG_PRIMER=true
+            forward_args+=("$1")
             ;;
         --skip-lxd-publish)
             # shellcheck disable=SC2034
             SKIP_LXD_PUBLISH=true
+            forward_args+=("$1")
             ;;
         --skip-lxd-snapshot)
             # shellcheck disable=SC2034
             SKIP_LXD_SNAPSHOT=true
+            forward_args+=("$1")
             ;;
         -h|--help)
             usage
@@ -73,6 +86,7 @@ while [[ $# -gt 0 ]]; do
             return 1 2>/dev/null || exit 1
             ;;
         *)
+            # These are non-flag arguments (positional)
             clean_args+=("$1")
             ;;
     esac
