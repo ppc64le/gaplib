@@ -62,6 +62,27 @@ ensure_lxd() {
     fi
 }
 
+# shellcheck disable=SC2329
+# shellcheck disable=SC2317
+cleanup_builder() {
+  local container_name="$1"
+  
+  # If Debug mode is on, keep the container for inspection
+  if [[ "${LXD_DEBUG:-false}" == "true" ]]; then
+     msg "Debug mode enabled. Container ${container_name} preserved."
+     return
+  fi
+  msg "Executing cleanup for container ${container_name}..."
+  if lxc info "${container_name}" &>/dev/null; then
+    msg "Stopping container ${container_name}..."
+    # If the container is ephemeral, stopping it deletes it.
+    # If not, we force delete to be safe.
+    lxc delete -f "${container_name}" 2>/dev/null || true
+  else
+    msg "Container ${container_name} already gone."
+  fi
+}
+
 build_image() {
   set -e
 
@@ -79,19 +100,18 @@ build_image() {
 
   # Trap INT (Ctrl+C), TERM (kill), and EXIT signals to guarantee cleanup.
   # shellcheck disable=SC2064
-  trap "{
-    msg \"Signal caught! Executing cleanup for container ${BUILD_CONTAINER}...\"
-    if lxc info \"${BUILD_CONTAINER}\" &>/dev/null; then
-      msg \"Stopping container ${BUILD_CONTAINER} to trigger deletion...\"
-      # Container is ephemeral, so stopping it will also delete it.
-      lxc stop -f \"${BUILD_CONTAINER}\"
-    else
-      msg \"Container ${BUILD_CONTAINER} already gone.\"
-    fi
-  }" INT TERM EXIT
+  trap "cleanup_builder '${BUILD_CONTAINER}'" INT TERM EXIT
 
-  msg "Launching ephemeral build container ${BUILD_CONTAINER} from image ${LXD_CONTAINER}"
-  lxc launch "${LXD_CONTAINER}" "${BUILD_CONTAINER}" --ephemeral
+  msg "Launching build container ${BUILD_CONTAINER} from image ${LXD_CONTAINER}..."
+
+  if [[ "${LXD_DEBUG:-false}" == "true" ]]; then
+    # Non-ephemeral for debugging
+    lxc launch "${LXD_CONTAINER}" "${BUILD_CONTAINER}"
+  else
+    # Ephemeral for clean builds
+    lxc launch "${LXD_CONTAINER}" "${BUILD_CONTAINER}" --ephemeral
+  fi
+
   lxc ls
 
   # Give container some time to wake up and remap the filesystem

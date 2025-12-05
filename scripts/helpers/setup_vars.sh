@@ -13,6 +13,7 @@ usage() {
     echo "  5. SETUP_TYPE    (Optional, default: minimal)"
     echo ""
     echo "Flags:"
+    echo "  --lxd-debug             Enable LXD debug mode (non-ephemeral containers)"
     echo "  --skip-snap-lxd         Skip snap and lxd installation and configuration"
     echo "  --skip-lxd-img-export   Skip LXD image export"
     echo "  --skip-lxd-img-primer   Skip LXD image primer"
@@ -25,6 +26,7 @@ usage() {
 }
 
 # Initialize Defaults ---
+LXD_DEBUG=false
 SKIP_SNAP_LXD=false
 SKIP_LXD_IMG_EXPORT=false
 SKIP_LXD_IMG_PRIMER=false
@@ -40,6 +42,10 @@ clean_args=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --lxd-debug)
+            # shellcheck disable=SC2034
+            LXD_DEBUG=true
+            ;;
         --skip-snap-lxd)
             # shellcheck disable=SC2034
             SKIP_SNAP_LXD=true
