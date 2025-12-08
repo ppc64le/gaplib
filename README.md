@@ -1,3 +1,7 @@
+# Latest development: https://github.com/IBM/action-runner-image-pz
+
+Code contributions will not be accepted in this repo. Please use: https://github.com/IBM/action-runner-image-pz
+
 # **GapLib**
 
 Github Actions on Power LXD Image Builder
